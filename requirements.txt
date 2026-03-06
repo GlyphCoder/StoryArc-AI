@@ -5,3 +5,7 @@ pandas==2.2.3              # Tabular display for emotional arcs and risk predict
 fastapi==0.115.6           # Backend API framework
 uvicorn[standard]==0.32.1  # ASGI server for FastAPI
 pydantic==2.9.2            # Request/response validation models
+google-cloud-texttospeech==2.14.2  # Google Cloud Text-to-Speech for narration
+python-multipart==0.0.6    # Support for file uploads
+aiofiles==23.2.1           # Async file operations
+requests==2.31.0           # HTTP requests

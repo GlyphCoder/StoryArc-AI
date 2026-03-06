@@ -2,536 +2,2223 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>VBOX Episodic Intelligence Engine</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VBOX - Episodic Intelligence Engine</title>
+    
+    <!-- Fonts with Fallback -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,400;1,700&display=swap" rel="stylesheet">
     
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            darkMode: 'class',
-            theme: {
-                extend: {
-                    colors: {
-                        indigo: '#0B0F19',
-                        arena: '#0F1522',
-                        crimson: '#F43F5E',
-                        slateLight: '#F1F5F9',
-                        volt: '#CCF381',
-                        slateDim: '#94A3B8',
-                        slateBorder: '#1E293B'
-                    },
-                    fontFamily: {
-                        sans: ['Inter', 'sans-serif'],
-                        mono: ['Fira Code', 'monospace']
-                    }
-                }
+    
+    <!-- Chart.js for visualizations -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    
+    <!-- React & Dependencies via CDN -->
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    
+    <!-- Babel for JSX -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        :root {
+            --aqua: #7dd3fc;
+            --aqua-light: #cffafe;
+            --violet: #c084fc;
+            --violet-light: #ede9fe;
+            --dark-bg: #0f172a;
+            --dark-surface: #1e293b;
+            --light-bg: #f8fafc;
+            --light-surface: #f1f5f9;
+        }
+        
+        body.light-mode {
+            --aqua: #06b6d4;
+            --aqua-light: #e0f9fa;
+            --violet: #a855f7;
+            --violet-light: #f3e8ff;
+            --dark-bg: #f8fafc;
+            --dark-surface: #f1f5f9;
+        }
+        
+        body, html {
+            width: 100%;
+            height: 100%;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
+            background: var(--dark-bg);
+            color: #e2e8f0;
+            overflow-x: hidden;
+            transition: background-color 0.3s ease, color 0.3s ease;
+            font-size: 16px;
+            line-height: 1.5;
+        }
+        
+        body.light-mode {
+            color: #1e293b;
+        }
+        
+        #root {
+            width: 100%;
+            min-height: 100vh;
+        }
+        
+        h1, h2, h3, h4, h5, h6 {
+            font-weight: 600;
+            letter-spacing: -0.01em;
+        }
+        
+        p, span, button, input, textarea, select, label {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+        }
+        
+        .glass {
+            background: rgba(15, 23, 42, 0.7);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(125, 211, 252, 0.2);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            transition: all 0.3s ease;
+        }
+        
+        body.light-mode .glass {
+            background: rgba(255, 255, 255, 0.7);
+            border: 1px solid rgba(6, 182, 212, 0.2);
+        }
+        
+        .glass:hover {
+            border-color: rgba(125, 211, 252, 0.4);
+            background: rgba(15, 23, 42, 0.8);
+        }
+        
+        body.light-mode .glass:hover {
+            border-color: rgba(6, 182, 212, 0.4);
+            background: rgba(255, 255, 255, 0.8);
+        }
+        
+        .gradient-text {
+            background: linear-gradient(135deg, #7dd3fc, #c084fc, #f472b6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: gradient-shift 8s ease infinite;
+        }
+        
+        @keyframes gradient-shift {
+            0%, 100% { 
+                background: linear-gradient(135deg, #7dd3fc, #c084fc, #f472b6);
+            }
+            50% { 
+                background: linear-gradient(135deg, #c084fc, #f472b6, #7dd3fc);
             }
         }
-    </script>
-    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@300;400;600&family=Inter:wght@300;400;700&display=swap" rel="stylesheet">
-
-    <style>
-        body, html { margin: 0; padding: 0; width: 100%; height: 100%; background-color: #0B0F19; color: #F1F5F9; font-family: 'Inter', sans-serif; }
-        #root { width: 100%; height: 100%; }
-        .glass-panel {
-            background: rgba(15, 21, 34, 0.6);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            border: 1px solid rgba(30, 41, 59, 0.8);
-            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.5);
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #7dd3fc, #c084fc);
+            transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+            position: relative;
+            overflow: hidden;
+            color: white;
+            font-weight: 600;
+            border: none;
+            cursor: pointer;
+        }
+        
+        .btn-primary::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+            transition: left 0.5s ease;
+        }
+        
+        .btn-primary:hover::before {
+            left: 100%;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-3px) scale(1.02);
+            box-shadow: 0 16px 32px rgba(125, 211, 252, 0.4);
+        }
+        
+        .btn-secondary {
+            border: 2px solid var(--aqua);
+            color: var(--aqua);
+            transition: all 0.3s ease;
+            background: transparent;
+            cursor: pointer;
+            font-weight: 600;
+        }
+        
+        .btn-secondary:hover {
+            background: var(--aqua);
+            color: #0f172a;
+            transform: translateY(-2px);
+        }
+        
+        body.light-mode .btn-secondary {
+            border-color: #06b6d4;
+            color: #06b6d4;
+        }
+        
+        body.light-mode .btn-secondary:hover {
+            background: #06b6d4;
+            color: #f8fafc;
+        }
+        
+        .fade-in {
+            animation: fadeIn 0.6s ease-in-out;
+        }
+        
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .slide-in {
+            animation: slideIn 0.5s ease-out;
+        }
+        
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+        
+        .bounce-in {
+            animation: bounceIn 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        
+        @keyframes bounceIn {
+            0% {
+                opacity: 0;
+                transform: scale(0.3);
+            }
+            50% {
+                opacity: 1;
+                transform: scale(1.05);
+            }
+            100% {
+                transform: scale(1);
+            }
+        }
+        
+        .modal-backdrop {
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(5px);
+            animation: fadeIn 0.3s ease;
+            position: fixed;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 50;
+        }
+        
+        .modal-content {
+            background: var(--dark-surface);
+            border: 1px solid rgba(125, 211, 252, 0.3);
+            border-radius: 16px;
+            max-width: 700px;
+            max-height: 80vh;
+            overflow-y: auto;
+            padding: 2rem;
+            animation: slideIn 0.3s ease-out;
+        }
+        
+        body.light-mode .modal-content {
+            background: #ffffff;
+            border: 1px solid rgba(6, 182, 212, 0.3);
+        }
+        
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: rgba(30, 41, 59, 0.3);
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: linear-gradient(180deg, #7dd3fc, #c084fc);
+            border-radius: 4px;
+        }
+        
+        ::-webkit-scrollbar-thumb:hover {
+            background: linear-gradient(180deg, #06b6d4, #a855f7);
         }
     </style>
-
-    <!-- Import Maps for React -->
-    <script type="importmap">
-    {
-        "imports": {
-            "react": "https://esm.sh/react@18.2.0",
-            "react/jsx-runtime": "https://esm.sh/react@18.2.0/jsx-runtime",
-            "react-dom/client": "https://esm.sh/react-dom@18.2.0/client",
-            "lucide-react": "https://esm.sh/lucide-react@0.330.0?external=react",
-            "framer-motion": "https://esm.sh/framer-motion@11.2.10?external=react"
-        }
-    }
-    </script>
-    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 </head>
 <body>
     <div id="root"></div>
 
-    <script type="text/babel" data-type="module">
-        import React, { useState, useEffect, createContext, useContext, useCallback } from 'react';
-        import { createRoot } from 'react-dom/client';
-        import { Sun, Moon, Film, BarChart2, Zap, AlertTriangle, BookOpen, Download, Trash2, History, X } from 'lucide-react';
-        import { motion, AnimatePresence } from 'framer-motion';
+    <script type="text/babel">
+        const { useState, useEffect, useRef, useCallback } = React;
 
-        const ToastContext = createContext();
-
-        const ToastProvider = ({ children }) => {
-            const [toasts, setToasts] = useState([]);
-            const id = () => Math.random().toString(36).substr(2, 9);
-
-            const addToast = useCallback((content, type = 'info') => {
-                setToasts(toasts => [...toasts, { id: id(), content, type }]);
-            }, [setToasts]);
-
-            const removeToast = useCallback((id) => {
-                setToasts(toasts => toasts.filter(t => t.id !== id));
-            }, [setToasts]);
-
-            return (
-                <ToastContext.Provider value={{ addToast, removeToast }}>
-                    {children}
-                    <div className="fixed top-4 right-4 z-50">
-                        <AnimatePresence>
-                            {toasts.map(toast => (
-                                <Toast key={toast.id} {...toast} removeToast={removeToast} />
-                            ))}
-                        </AnimatePresence>
-                    </div>
-                </ToastContext.Provider>
-            );
-        };
-
-        const Toast = ({ id, content, type, removeToast }) => {
-            useEffect(() => {
-                const timer = setTimeout(() => removeToast(id), 5000);
-                return () => clearTimeout(timer);
-            }, [id, removeToast]);
-
-            const colors = {
-                info: 'bg-blue-500',
-                success: 'bg-green-500',
-                error: 'bg-crimson',
-            };
-
-            return (
-                <motion.div
-                    layout
-                    initial={{ opacity: 0, y: -50, scale: 0.3 }}
-                    animate={{ opacity: 1, y: 0, scale: 1 }}
-                    exit={{ opacity: 0, scale: 0.5, transition: { duration: 0.2 } }}
-                    className={`relative p-4 mb-4 text-white rounded-lg shadow-lg ${colors[type]}`}
-                >
-                    <button onClick={() => removeToast(id)} className="absolute top-2 right-2 text-white/70 hover:text-white"><X size={18}/></button>
-                    {content}
-                </motion.div>
-            );
-        };
-
-        const useToast = () => useContext(ToastContext);
-
-        const ThemeContext = createContext();
-
-        const ThemeProvider = ({ children }) => {
-            const [theme, setTheme] = useState(localStorage.getItem('theme') || 'dark');
-
-            useEffect(() => {
-                const root = window.document.documentElement;
-                root.classList.remove('light', 'dark');
-                root.classList.add(theme);
-                localStorage.setItem('theme', theme);
-            }, [theme]);
-
-            return (
-                <ThemeContext.Provider value={{ theme, setTheme }}>
-                    {children}
-                </ThemeContext.Provider>
-            );
-        };
-
-        const ThemeSwitcher = () => {
-            const { theme, setTheme } = useContext(ThemeContext);
-
-            return (
-                <motion.button
-                    onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
-                    className="glass-panel p-2 rounded-full text-volt hover:text-white"
-                    whileHover={{ scale: 1.1 }}
-                    whileTap={{ scale: 0.9 }}
-                >
-                    <AnimatePresence mode="wait">
-                        <motion.div
-                            key={theme}
-                            initial={{ opacity: 0, rotate: -90 }}
-                            animate={{ opacity: 1, rotate: 0 }}
-                            exit={{ opacity: 0, rotate: 90 }}
-                            transition={{ duration: 0.2 }}
-                        >
-                            {theme === 'dark' ? <Sun size={20} /> : <Moon size={20} />}
-                        </motion.div>
-                    </AnimatePresence>
-                </motion.button>
-            );
-        };
-
-        const StoryInput = ({ core_idea, set_core_idea, episode_count, set_episode_count, on_generate, loading }) => {
-            return (
-                <motion.div 
-                    className="mb-8 glass-panel p-6 rounded-lg"
-                    initial={{ opacity: 0, y: 50 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.5 }}
-                >
-                    <h2 className="text-2xl font-bold mb-4 text-volt flex items-center"><BookOpen className="mr-2"/>1. Input Your Core Story Idea</h2>
-                    <textarea
-                        className="w-full bg-arena border-b-2 border-slateBorder p-3 text-slateLight font-mono text-sm focus:outline-none focus:border-volt transition-colors placeholder:text-slateBorder rounded-md"
-                        rows="5"
-                        placeholder="Example: A rookie urban magician tries to expose a viral fake psychic cult, only to discover their illusions are powered by real, dangerous tech..."
-                        value={core_idea}
-                        onChange={(e) => set_core_idea(e.target.value)}
-                        disabled={loading}
-                    ></textarea>
-                    <div className="mt-4">
-                        <label htmlFor="episode_count" className="block text-sm font-medium text-slateDim mb-2">
-                            Number of Episodes: {episode_count}
-                        </label>
-                        <input
-                            type="range"
-                            id="episode_count"
-                            min="5"
-                            max="8"
-                            value={episode_count}
-                            onChange={(e) => set_episode_count(e.target.value)}
-                            className="w-full h-2 bg-slateBorder rounded-lg appearance-none cursor-pointer"
-                            disabled={loading}
-                        />
-                    </div>
-                    <div className="mt-6 text-center">
-                        <motion.button
-                            onClick={on_generate}
-                            className="px-8 py-3 border-2 border-volt text-volt hover:bg-volt hover:text-indigo transition-all font-bold tracking-widest rounded-full flex items-center justify-center mx-auto"
-                            whileHover={{ scale: 1.05 }}
-                            whileTap={{ scale: 0.95 }}
-                            disabled={loading}
-                        >
-                            <Zap className="mr-2" size={18}/>
-                            {loading ? 'Generating...' : 'Generate Episodic Intelligence'}
-                        </motion.button>
-                    </div>
-                </motion.div>
-            );
-        };
-
-        const ResultsDisplay = ({ results, onClear, onExport }) => {
-            if (!results) return null;
-
-            const { series, engine_metrics } = results;
-
-            return (
-                <motion.div 
-                    className="glass-panel p-6 rounded-lg"
-                    initial={{ opacity: 0, y: 50 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.5 }}
-                >
-                    <div className="flex justify-between items-center mb-4">
-                        <h2 className="text-2xl font-bold text-volt flex items-center"><BarChart2 className="mr-2"/>2. Analysis Results</h2>
-                        <div>
-                            <motion.button onClick={onExport} className="p-2 text-slateDim hover:text-volt" title="Export JSON" whileHover={{scale: 1.1}}><Download size={18}/></motion.button>
-                            <motion.button onClick={onClear} className="p-2 text-slateDim hover:text-crimson" title="Clear Results" whileHover={{scale: 1.1}}><Trash2 size={18}/></motion.button>
-                        </div>
-                    </div>
-                    <SeriesOverview series={series} metrics={engine_metrics} />
-                    <div className="mt-8">
-                        <h3 className="text-xl font-bold mb-4">Episode-by-Episode Intelligence</h3>
-                        <AnimatePresence>
-                        {series.episodes.map((episode, i) => (
-                            <EpisodeDetails key={episode.episode_number} episode={episode} index={i} />
-                        ))}
-                        </AnimatePresence>
-                    </div>
-                </motion.div>
-            );
-        };
-
-        const SeriesOverview = ({ series, metrics }) => {
-            return (
-                <motion.div initial={{opacity:0}} animate={{opacity:1}}>
-                    <h3 className="text-2xl font-bold text-volt flex items-center"><Film className="mr-2"/>{series.series_title}</h3>
-                    <p className="text-slateDim italic mt-1">{series.series_logline}</p>
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-4 text-center">
-                        <motion.div whileHover={{scale:1.05}} className="glass-panel p-4 rounded-lg">
-                            <p className="text-3xl font-bold">{series.total_episodes}</p>
-                            <p className="text-sm text-slateDim">Total Episodes</p>
-                        </motion.div>
-                        <motion.div whileHover={{scale:1.05}} className="glass-panel p-4 rounded-lg">
-                            <p className="text-3xl font-bold">{metrics.avg_cliffhanger_strength}</p>
-                            <p className="text-sm text-slateDim">Avg. Cliffhanger</p>
-                        </motion.div>
-                        <motion.div whileHover={{scale:1.05}} className="glass-panel p-4 rounded-lg">
-                            <p className="text-3xl font-bold">{metrics.high_risk_segments}</p>
-                            <p className="text-sm text-slateDim">High-Risk Segments</p>
-                        </motion.div>
-                        <motion.div whileHover={{scale:1.05}} className="glass-panel p-4 rounded-lg">
-                            <p className="text-3xl font-bold">{metrics.flat_zone_warnings}</p>
-                            <p className="text-sm text-slateDim">Flat-Zone Warnings</p>
-                        </motion.div>
-                    </div>
-                </motion.div>
-            );
-        };
-
-        const EpisodeDetails = ({ episode, index }) => {
-            const [is_open, set_is_open] = useState(false);
-            return (
-                <motion.div 
-                    className="mb-4 glass-panel rounded-lg overflow-hidden"
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: index * 0.1 }}
-                >
-                    <button
-                        onClick={() => set_is_open(!is_open)}
-                        className="w-full text-left p-4 bg-arena hover:bg-slateBorder transition-colors flex justify-between items-center"
-                    >
-                        <h4 className="font-bold">Episode {episode.episode_number}: {episode.episode_title}</h4>
-                        <motion.div animate={{ rotate: is_open ? 90 : 0}}><Zap size={16} className="text-volt"/></motion.div>
-                    </button>
-                    <AnimatePresence>
-                    {is_open && (
-                        <motion.div 
-                            className="p-4"
-                            initial={{ height: 0, opacity: 0 }}
-                            animate={{ height: 'auto', opacity: 1 }}
-                            exit={{ height: 0, opacity: 0 }}
-                            transition={{ duration: 0.3 }}
-                        >
-                            <p className="mb-4"><span className="font-bold text-slateDim">Narrative:</span> {episode.narrative_breakdown}</p>
-                            
-                            <h5 className="font-bold text-slateDim mt-4 mb-2">Emotional Arc Analysis</h5>
-                            <div className="overflow-x-auto">
-                                <table className="w-full text-sm text-left">
-                                    <thead className="bg-arena">
-                                        <tr>
-                                            <th className="p-2">Time Block</th>
-                                            <th className="p-2">Emotion</th>
-                                            <th className="p-2">Engagement</th>
-                                            <th className="p-2">Warning</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {episode.emotional_arc_analysis.map((arc, i) => (
-                                            <tr key={i} className="border-b border-slateBorder">
-                                                <td className="p-2">{arc.time_block}</td>
-                                                <td className="p-2">{arc.dominant_emotion}</td>
-                                                <td className="p-2">{arc.engagement_level}</td>
-                                                <td className="p-2">{arc.flat_zone_warning ? <span className="text-crimson flex items-center"><AlertTriangle size={14} className="mr-1"/> Yes</span> : 'No'}</td>
-                                            </tr>
-                                        ))}
-                                    </tbody>
-                                </table>
-                            </div>
-
-                            <h5 className="font-bold text-slateDim mt-4 mb-2">Optimisation Suggestions</h5>
-                            <ul className="list-disc list-inside">
-                                {episode.optimisation_suggestions.map((suggestion, i) => (
-                                    <li key={i}>{suggestion}</li>
-                                ))}
-                            </ul>
-                        </motion.div>
-                    )}
-                    </AnimatePresence>
-                </motion.div>
-            );
-        };
-        
-        const HistoryPanel = ({ history, onLoad, onClearHistory }) => {
-            return (
-                <motion.div 
-                    className="fixed top-0 right-0 h-full w-80 bg-indigo glass-panel z-50 p-4"
-                    initial={{ x: '100%' }}
-                    animate={{ x: 0 }}
-                    exit={{ x: '100%' }}
-                    transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-                >
-                    <div className="flex justify-between items-center mb-4">
-                        <h3 className="text-xl font-bold text-volt flex items-center"><History className="mr-2"/> History</h3>
-                        <motion.button onClick={onClearHistory} className="p-2 text-slateDim hover:text-crimson" title="Clear History" whileHover={{scale: 1.1}}><Trash2 size={18}/></motion.button>
-                    </div>
-                    <div className="h-full overflow-y-auto">
-                        {history.length === 0 ? (
-                            <p className="text-slateDim text-center mt-8">No history yet.</p>
-                        ) : (
-                            history.map(item => (
-                                <motion.div 
-                                    key={item.id} 
-                                    className="p-3 mb-2 rounded-md bg-arena hover:bg-slateBorder cursor-pointer"
-                                    onClick={() => onLoad(item.results)}
-                                    whileHover={{scale:1.02}}
-                                >
-                                    <p className="font-bold truncate">{item.results.series.series_title}</p>
-                                    <p className="text-xs text-slateDim">{new Date(item.timestamp).toLocaleString()}</p>
-                                </motion.div>
-                            ))
-                        )}
-                    </div>
-                </motion.div>
-            )
-        }
-
-        const App = () => {
-            const toast = useToast();
-            const [core_idea, set_core_idea] = useState('');
-            const [episode_count, set_episode_count] = useState(6);
-            const [results, set_results] = useState(null);
-            const [loading, set_loading] = useState(false);
-            const [history, set_history] = useState([]);
-            const [show_history, set_show_history] = useState(false);
+        // Main App Component
+        function App() {
+            const [currentView, setCurrentView] = useState('home');
+            const [loading, setLoading] = useState(false);
+            const [generatedData, setGeneratedData] = useState(null);
+            const [darkMode, setDarkMode] = useState(true);
+            const [showDocs, setShowDocs] = useState(false);
+            const [showGuide, setShowGuide] = useState(false);
+            const [formData, setFormData] = useState({
+                core_idea: '',
+                episode_count: 6,
+                genre: 'drama',
+                tone: 'dramatic',
+                target_audience: '18-35',
+                model_name: 'gemini-2.5-flash'
+            });
             
-            const uuid = () => crypto.randomUUID();
-
             useEffect(() => {
-                const stored_history = localStorage.getItem('episodic_history');
-                if (stored_history) {
-                    set_history(JSON.parse(stored_history));
+                if (darkMode) {
+                    document.body.classList.remove('light-mode');
+                } else {
+                    document.body.classList.add('light-mode');
                 }
-            }, []);
-
-            useEffect(() => {
-                localStorage.setItem('episodic_history', JSON.stringify(history));
-            }, [history]);
-
-            const handle_generate = async () => {
-                set_loading(true);
-                set_results(null);
+            }, [darkMode]);
+            
+            const handleSubmit = async (e) => {
+                e.preventDefault();
+                setLoading(true);
                 
-                const API_URL = 'http://127.0.0.1:8000/api/analyse';
-
                 try {
-                    const response = await fetch(API_URL, {
+                    const response = await fetch('http://localhost:8001/api/analyse', {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
                         },
-                        body: JSON.stringify({
-                            core_idea: core_idea,
-                            episode_count: parseInt(episode_count, 10),
-                        }),
+                        body: JSON.stringify(formData)
                     });
-
-                    if (!response.ok) {
-                        const err_data = await response.json();
-                        throw new Error(err_data.detail || 'An unknown error occurred.');
-                    }
-
+                    
+                    if (!response.ok) throw new Error('API request failed');
+                    
                     const data = await response.json();
-                    set_results(data);
-                    set_history(prev => [{ id: uuid(), results: data, timestamp: new Date() }, ...prev]);
-                    toast.addToast('Analysis successful!', 'success');
-                } catch (err) {
-                    toast.addToast(err.message, 'error');
+                    setGeneratedData(data);
+                    setCurrentView('results');
+                } catch (error) {
+                    alert('Error: ' + error.message);
                 } finally {
-                    set_loading(false);
+                    setLoading(false);
                 }
             };
-
-            const handle_clear = () => {
-                set_results(null);
-                toast.addToast('Results cleared', 'info');
-            }
             
-            const handle_export = () => {
-                if (!results) return;
-                const blob = new Blob([JSON.stringify(results, null, 2)], { type: 'application/json' });
-                const url = URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = 'episodic_intelligence_results.json';
-                a.click();
-                URL.revokeObjectURL(url);
-                toast.addToast('Results exported', 'info');
-            };
-            
-            const load_from_history = (data) => {
-                set_results(data);
-                set_show_history(false);
-                toast.addToast('Loaded from history', 'info');
-            }
-            
-            const clear_history = () => {
-                set_history([]);
-                toast.addToast('History cleared', 'info');
-            }
-
             return (
-                <motion.div 
-                    className="min-h-screen bg-white dark:bg-indigo text-slate-800 dark:text-slateLight p-4 sm:p-6 md:p-8"
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    transition={{ duration: 0.8 }}
-                >
-                    <div className="max-w-7xl mx-auto">
-                        <header className="text-center mb-8 relative">
-                            <h1 className="text-4xl sm:text-5xl font-bold text-volt font-mono">VBOX Episodic Intelligence Engine</h1>
-                            <p className="text-slate-600 dark:text-slateDim mt-2">AI-powered narrative intelligence for vertical episodic storytelling.</p>
-                            <div className="absolute top-4 right-14">
-                                <motion.button onClick={() => set_show_history(true)} className="glass-panel p-2 rounded-full text-volt hover:text-white" whileHover={{scale:1.1}}><History size={20}/></motion.button>
-                            </div>
-                            <ThemeSwitcher />
-                        </header>
+                <div className="w-full min-h-screen">
+                    {currentView === 'home' && (
+                        <HomePage 
+                            setCurrentView={setCurrentView}
+                            formData={formData}
+                            setFormData={setFormData}
+                            handleSubmit={handleSubmit}
+                            loading={loading}
+                            darkMode={darkMode}
+                            setDarkMode={setDarkMode}
+                            showDocs={showDocs}
+                            setShowDocs={setShowDocs}
+                            showGuide={showGuide}
+                            setShowGuide={setShowGuide}
+                        />
+                    )}
+                    {currentView === 'results' && generatedData && (
+                        <ResultsPage 
+                            data={generatedData}
+                            setCurrentView={setCurrentView}
+                            darkMode={darkMode}
+                            setDarkMode={setDarkMode}
+                            showDocs={showDocs}
+                            setShowDocs={setShowDocs}
+                            showGuide={showGuide}
+                            setShowGuide={setShowGuide}
+                        />
+                    )}
+                </div>
+            );
+        }
 
-                        <main className="grid md:grid-cols-2 gap-8">
-                            <div>
-                                <StoryInput
-                                    core_idea={core_idea}
-                                    set_core_idea={set_core_idea}
-                                    episode_count={episode_count}
-                                    set_episode_count={set_episode_count}
-                                    on_generate={handle_generate}
-                                    loading={loading}
+        // Documentation Modal
+        function DocsModal({ isOpen, onClose }) {
+            if (!isOpen) return null;
+            
+            return (
+                <div className="modal-backdrop" onClick={onClose}>
+                    <div className="modal-content" onClick={e => e.stopPropagation()}>
+                        <div className="flex justify-between items-center mb-6">
+                            <h2 className="text-2xl font-bold gradient-text">Documentation</h2>
+                            <button onClick={onClose} className="text-2xl text-red-400 hover:text-red-300">×</button>
+                        </div>
+                        <div className="space-y-6 text-sm leading-relaxed">
+                            <section>
+                                <h3 className="text-xl font-semibold mb-3 text-cyan-300">Getting Started</h3>
+                                <p className="text-gray-300 mb-2">VBOX transforms your story ideas into fully analyzed vertical series. Here's how it works:</p>
+                                <ul className="list-disc list-inside space-y-2 text-gray-400">
+                                    <li>Enter your story concept (90-second episodes)</li>
+                                    <li>Choose genre, tone, and target audience</li>
+                                    <li>AI analyzes and generates 5-8 episode breakdowns</li>
+                                    <li>Explore detailed insights across 6 tabs</li>
+                                </ul>
+                            </section>
+                            
+                            <section>
+                                <h3 className="text-xl font-semibold mb-3 text-cyan-300">Key Features</h3>
+                                <div className="space-y-2">
+                                    <div className="flex gap-2">
+                                        <span className="text-violet-400">✨</span>
+                                        <span><strong>Emotional Arc Analysis</strong> - Track emotional peaks and valleys</span>
+                                    </div>
+                                    <div className="flex gap-2">
+                                        <span className="text-cyan-400">🎬</span>
+                                        <span><strong>Shot Composition</strong> - Professional cinematography guidance</span>
+                                    </div>
+                                    <div className="flex gap-2">
+                                        <span className="text-violet-400">🎨</span>
+                                        <span><strong>Visual Mood Board</strong> - Color palettes, lighting, camera styles</span>
+                                    </div>
+                                    <div className="flex gap-2">
+                                        <span className="text-cyan-400">🎵</span>
+                                        <span><strong>Music & Sound</strong> - Genre, tempo, and SFX recommendations</span>
+                                    </div>
+                                </div>
+                            </section>
+                            
+                            <section>
+                                <h3 className="text-xl font-semibold mb-3 text-cyan-300">API Endpoints</h3>
+                                <p className="text-gray-400 mb-2"><code className="bg-gray-800 px-2 py-1 rounded">POST /api/analyse</code> - Full series analysis</p>
+                                <p className="text-gray-400"><code className="bg-gray-800 px-2 py-1 rounded">GET /api/health</code> - API status check</p>
+                            </section>
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+        
+        // Guide Modal
+        function GuideModal({ isOpen, onClose }) {
+            if (!isOpen) return null;
+            
+            return (
+                <div className="modal-backdrop" onClick={onClose}>
+                    <div className="modal-content" onClick={e => e.stopPropagation()}>
+                        <div className="flex justify-between items-center mb-6">
+                            <h2 className="text-2xl font-bold gradient-text">Quick Start Guide</h2>
+                            <button onClick={onClose} className="text-2xl text-red-400 hover:text-red-300">×</button>
+                        </div>
+                        <div className="space-y-6 text-sm">
+                            <div className="bg-cyan-500/10 border border-cyan-400/30 rounded-lg p-4">
+                                <h4 className="font-semibold text-cyan-300 mb-2">Step 1: Write Your Story</h4>
+                                <p className="text-gray-300">Describe the core concept of your vertical series. Include main characters, plot hooks, and the overall arc you want to explore.</p>
+                            </div>
+                            
+                            <div className="bg-violet-500/10 border border-violet-400/30 rounded-lg p-4">
+                                <h4 className="font-semibold text-violet-300 mb-2">Step 2: Choose Your Settings</h4>
+                                <p className="text-gray-300">Select the number of episodes (5-8), genre, tone, and target audience to tailor the analysis.</p>
+                            </div>
+                            
+                            <div className="bg-cyan-500/10 border border-cyan-400/30 rounded-lg p-4">
+                                <h4 className="font-semibold text-cyan-300 mb-2">Step 3: Generate Analysis</h4>
+                                <p className="text-gray-300">Click "Generate Series ✨" and wait 30-90 seconds for the AI to analyze your story.</p>
+                            </div>
+                            
+                            <div className="bg-violet-500/10 border border-violet-400/30 rounded-lg p-4">
+                                <h4 className="font-semibold text-violet-300 mb-2">Step 4: Explore Insights</h4>
+                                <p className="text-gray-300">Review all 6 tabs: Overview (metrics), Episodes (details), Characters (arcs), Visuals (mood board), Music (sound design), and Shots (composition).</p>
+                            </div>
+                            
+                            <div className="bg-green-500/10 border border-green-400/30 rounded-lg p-4">
+                                <h4 className="font-semibold text-green-300 mb-2">Pro Tips</h4>
+                                <ul className="space-y-1 text-gray-300 ml-4">
+                                    <li>• Be specific with your story idea (more details = better analysis)</li>
+                                    <li>• Try different genres and tones to see variations</li>
+                                    <li>• Pay attention to retention risk predictions</li>
+                                    <li>• Use optimization suggestions to improve pacing</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+
+        // Home Page Component
+        function HomePage({ setCurrentView, formData, setFormData, handleSubmit, loading, darkMode, setDarkMode, showDocs, setShowDocs, showGuide, setShowGuide }) {
+            return (
+                <div className="min-h-screen w-full">
+                    <DocsModal isOpen={showDocs} onClose={() => setShowDocs(false)} />
+                    <GuideModal isOpen={showGuide} onClose={() => setShowGuide(false)} />
+                    
+                    {/* Header */}
+                    <header className="border-b glass sticky top-0 z-50">
+                        <div className="max-w-7xl mx-auto px-4 py-6">
+                            <div className="flex items-center justify-between">
+                                <div className="flex items-center gap-3 slide-in">
+                                    <div className="w-10 h-10 bg-gradient-to-br from-cyan-400 to-violet-500 rounded-lg flex items-center justify-center shadow-lg">
+                                        <span className="text-white font-bold text-lg">V</span>
+                                    </div>
+                                    <div>
+                                        <h1 className="text-2xl font-bold gradient-text">VBOX</h1>
+                                        <p className="text-xs text-cyan-300">Episodic Intelligence Engine</p>
+                                    </div>
+                                </div>
+                                <div className="flex gap-4 items-center">
+                                    <a href="https://github.com/bhavyashah/VBOX" target="_blank" rel="noopener noreferrer" className="btn-secondary px-4 py-2 rounded-lg text-sm flex items-center gap-2 hover:shadow-lg">
+                                        <span>→</span> GitHub
+                                    </a>
+                                    <button onClick={() => setShowDocs(true)} className="px-4 py-2 text-sm text-cyan-300 hover:text-cyan-200 transition font-medium">
+                                        Docs
+                                    </button>
+                                    <button onClick={() => setShowGuide(true)} className="px-4 py-2 text-sm text-cyan-300 hover:text-cyan-200 transition font-medium">
+                                        Guide
+                                    </button>
+                                    <button
+                                        onClick={() => setDarkMode(!darkMode)}
+                                        className="p-2 rounded-lg glass hover:border-cyan-400 transition text-lg"
+                                        title={darkMode ? 'Light Mode' : 'Dark Mode'}
+                                    >
+                                        {darkMode ? '☀️' : '🌙'}
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </header>
+
+                    {/* Hero Section */}
+                    <section className="relative py-20 px-4 overflow-hidden">
+                        <div className="absolute top-0 left-1/4 w-96 h-96 bg-cyan-400/10 rounded-full blur-3xl animate-pulse"></div>
+                        <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-violet-500/10 rounded-full blur-3xl animate-pulse" style={{animationDelay: '1s'}}></div>
+                        
+                        <div className="max-w-4xl mx-auto relative z-10 text-center fade-in">
+                            <h2 className="text-5xl md:text-6xl font-bold mb-6">
+                                Turn Your Story into
+                                <span className="block gradient-text mt-2">Engaging Vertical Series</span>
+                            </h2>
+                            <p className="text-xl text-slate-400 mb-8">
+                                AI-powered narrative intelligence: character development, visual mood boards, dialogue suggestions, music recommendations, and shot composition—all in one platform.
+                            </p>
+                        </div>
+                    </section>
+
+                    {/* Main Form Section */}
+                    <section className="py-12 px-4">
+                        <div className="max-w-3xl mx-auto bounce-in">
+                            <div className="glass rounded-2xl p-8 md:p-10">
+                                <h3 className="text-2xl font-bold mb-8">Create Your Series</h3>
+                                
+                                <form onSubmit={handleSubmit} className="space-y-6">
+                                    {/* Core Idea Textarea */}
+                                    <div>
+                                        <label className="block text-sm font-semibold mb-2 text-cyan-300">Your Story Idea</label>
+                                        <textarea
+                                            value={formData.core_idea}
+                                            onChange={(e) => setFormData({...formData, core_idea: e.target.value})}
+                                            placeholder="Describe the core concept for your vertical series (90-second episodes)..."
+                                            className="w-full bg-slate-900/50 border-2 border-cyan-400/30 rounded-xl p-4 text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:border-cyan-400 h-32 resize-none transition"
+                                            required
+                                        />
+                                    </div>
+
+                                    {/* Grid of Controls */}
+                                    <div className="grid md:grid-cols-2 gap-6">
+                                        <div>
+                                            <label className="block text-sm font-semibold mb-2 text-violet-300">Episodes</label>
+                                            <select
+                                                value={formData.episode_count}
+                                                onChange={(e) => setFormData({...formData, episode_count: parseInt(e.target.value)})}
+                                                className="w-full bg-slate-900/50 border-2 border-violet-400/30 rounded-xl p-3 text-white focus:outline-none focus:ring-2 focus:ring-violet-400 transition"
+                                            >
+                                                {[5,6,7,8].map(n => <option key={n} value={n}>{n} Episodes</option>)}
+                                            </select>
+                                        </div>
+
+                                        <div>
+                                            <label className="block text-sm font-semibold mb-2 text-cyan-300">Genre</label>
+                                            <select
+                                                value={formData.genre}
+                                                onChange={(e) => setFormData({...formData, genre: e.target.value})}
+                                                className="w-full bg-slate-900/50 border-2 border-cyan-400/30 rounded-xl p-3 text-white focus:outline-none focus:ring-2 focus:ring-cyan-400 transition"
+                                            >
+                                                <option>Drama</option>
+                                                <option>Comedy</option>
+                                                <option>Thriller</option>
+                                                <option>Romance</option>
+                                                <option>Sci-Fi</option>
+                                                <option>Fantasy</option>
+                                            </select>
+                                        </div>
+
+                                        <div>
+                                            <label className="block text-sm font-semibold mb-2 text-violet-300">Tone</label>
+                                            <select
+                                                value={formData.tone}
+                                                onChange={(e) => setFormData({...formData, tone: e.target.value})}
+                                                className="w-full bg-slate-900/50 border-2 border-violet-400/30 rounded-xl p-3 text-white focus:outline-none focus:ring-2 focus:ring-violet-400 transition"
+                                            >
+                                                <option>Dramatic</option>
+                                                <option>Light-hearted</option>
+                                                <option>Suspenseful</option>
+                                                <option>Romantic</option>
+                                                <option>Adventurous</option>
+                                            </select>
+                                        </div>
+
+                                        <div>
+                                            <label className="block text-sm font-semibold mb-2 text-cyan-300">Target Audience</label>
+                                            <select
+                                                value={formData.target_audience}
+                                                onChange={(e) => setFormData({...formData, target_audience: e.target.value})}
+                                                className="w-full bg-slate-900/50 border-2 border-cyan-400/30 rounded-xl p-3 text-white focus:outline-none focus:ring-2 focus:ring-cyan-400 transition"
+                                            >
+                                                <option>13-17</option>
+                                                <option>18-35</option>
+                                                <option>35-50</option>
+                                                <option>50+</option>
+                                                <option>All Ages</option>
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                    {/* Submit Button */}
+                                    <button
+                                        type="submit"
+                                        disabled={loading}
+                                        className="w-full btn-primary text-white font-semibold py-4 rounded-xl hover:shadow-lg disabled:opacity-50 transition"
+                                    >
+                                        {loading ? (
+                                            <span className="flex items-center justify-center gap-2">
+                                                <span className="animate-spin">⏳</span>
+                                                Generating Your Series...
+                                            </span>
+                                        ) : (
+                                            'Generate Series ✨'
+                                        )}
+                                    </button>
+                                </form>
+
+                                {/* Features Preview */}
+                                <div className="mt-12 pt-8 border-t border-cyan-400/20">
+                                    <h4 className="text-sm font-semibold text-cyan-300 mb-4">What You'll Get:</h4>
+                                    <div className="grid md:grid-cols-3 gap-4 text-sm">
+                                        <div className="flex gap-3 hover:text-cyan-300 transition">
+                                            <span>✨</span>
+                                            <span>Character Development Arcs</span>
+                                        </div>
+                                        <div className="flex gap-3 hover:text-violet-300 transition">
+                                            <span>🎬</span>
+                                            <span>Shot Composition Guide</span>
+                                        </div>
+                                        <div className="flex gap-3 hover:text-cyan-300 transition">
+                                            <span>🎵</span>
+                                            <span>Music Recommendations</span>
+                                        </div>
+                                        <div className="flex gap-3 hover:text-violet-300 transition">
+                                            <span>🎨</span>
+                                            <span>Visual Mood Boards</span>
+                                        </div>
+                                        <div className="flex gap-3 hover:text-cyan-300 transition">
+                                            <span>💬</span>
+                                            <span>Dialogue Suggestions</span>
+                                        </div>
+                                        <div className="flex gap-3 hover:text-violet-300 transition">
+                                            <span>📊</span>
+                                            <span>Emotional Arc Analysis</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    {/* Info Section */}
+                    <section className="py-20 px-4 border-t border-cyan-400/10">
+                        <div className="max-w-5xl mx-auto">
+                            <h3 className="text-3xl font-bold text-center mb-12">Advanced Features</h3>
+                            <div className="grid md:grid-cols-2 gap-8">
+                                <FeatureCard 
+                                    icon="✨" 
+                                    title="AI-Powered Analysis" 
+                                    desc="Google Gemini AI analyzes your story and creates episodic breakdowns optimized for engagement"
+                                />
+                                <FeatureCard 
+                                    icon="🎬" 
+                                    title="Multi-Section Guidance" 
+                                    desc="Get detailed recommendations for visuals, dialogue, music, shots, and character development"
+                                />
+                                <FeatureCard 
+                                    icon="📊" 
+                                    title="Rich Visualizations" 
+                                    desc="Interactive charts showing emotional arcs, risk prediction, and retention analytics"
+                                />
+                                <FeatureCard 
+                                    icon="🔊" 
+                                    title="Text-to-Speech" 
+                                    desc="Preview your narratives with professional voice narration"
                                 />
                             </div>
-                            <div>
-                                <AnimatePresence mode="wait">
-                                    {loading && (
-                                        <motion.div
-                                            key="loader"
-                                            className="glass-panel p-6 rounded-lg text-center h-full flex items-center justify-center"
-                                            initial={{ opacity: 0, y: 20 }}
-                                            animate={{ opacity: 1, y: 0 }}
-                                            exit={{ opacity: 0, y: -20 }}
-                                        >
-                                            <h2 className="text-2xl font-bold mb-4 text-volt animate-pulse">Generating Intelligence...</h2>
-                                        </motion.div>
-                                    )}
+                        </div>
+                    </section>
 
-                                    {results && !loading && (
-                                        <motion.div key="results" initial={{opacity:0}} animate={{opacity:1}}>
-                                            <ResultsDisplay results={results} onClear={handle_clear} onExport={handle_export} />
-                                        </motion.div>
-                                    )}
-
-                                    {!results && !loading && (
-                                        <motion.div 
-                                            key="placeholder"
-                                            className="glass-panel p-6 rounded-lg text-center h-full flex items-center justify-center"
-                                            initial={{ opacity: 0 }}
-                                            animate={{ opacity: 1 }}
-                                        >
-                                            <h2 className="text-2xl font-bold mb-4 text-slateDim">Your results will appear here</h2>
-                                        </motion.div>
-                                    )}
-                                </AnimatePresence>
-                            </div>
-                        </main>
-                        
-                        <AnimatePresence>
-                            {show_history && <HistoryPanel history={history} onLoad={load_from_history} onClearHistory={clear_history} onClose={() => set_show_history(false)} />}
-                        </AnimatePresence>
-                    </div>
-                </motion.div>
+                    {/* Footer */}
+                    <footer className="border-t border-cyan-400/10 py-12 px-4 text-center text-slate-500">
+                        <p>VBOX 2.0 | Built with ❤️ for creators everywhere</p>
+                        <p className="text-xs mt-2">Powered by Google Gemini AI</p>
+                    </footer>
+                </div>
             );
-        };
+        }
 
-        const root = createRoot(document.getElementById('root'));
-        root.render(
-            <ThemeProvider>
-                <ToastProvider>
-                    <App />
-                </ToastProvider>
-            </ThemeProvider>
+        function FeatureCard({ icon, title, desc }) {
+            return (
+                <div className="glass rounded-xl p-6 hover:border-cyan-400/50 transition group cursor-pointer">
+                    <div className="text-3xl mb-3 group-hover:scale-125 transition transform">{icon}</div>
+                    <h4 className="text-lg font-semibold mb-2 text-cyan-300">{title}</h4>
+                    <p className="text-slate-400 text-sm">{desc}</p>
+                </div>
+            );
+        }
+
+        // Results Page Component
+        function ResultsPage({ data, setCurrentView, darkMode, setDarkMode, showDocs, setShowDocs, showGuide, setShowGuide }) {
+            const [activeTab, setActiveTab] = useState('overview');
+            
+            return (
+                <div className="min-h-screen w-full">
+                    <DocsModal isOpen={showDocs} onClose={() => setShowDocs(false)} />
+                    <GuideModal isOpen={showGuide} onClose={() => setShowGuide(false)} />
+                    
+                    {/* Header with Back Button */}
+                    <header className="border-b glass sticky top-0 z-50">
+                        <div className="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
+                            <button 
+                                onClick={() => setCurrentView('home')}
+                                className="flex items-center gap-2 text-cyan-300 hover:text-cyan-200 transition hover:scale-110 transform font-medium"
+                            >
+                                ← Back
+                            </button>
+                            <h2 className="text-2xl font-bold gradient-text">Series Analysis</h2>
+                            <div className="flex gap-2">
+                                <button onClick={() => setShowDocs(true)} className="px-3 py-2 text-cyan-300 text-sm hover:text-cyan-200 transition font-medium">Docs</button>
+                                <button
+                                    onClick={() => setDarkMode(!darkMode)}
+                                    className="p-2 rounded-lg glass hover:border-cyan-400 transition text-lg"
+                                    title={darkMode ? 'Light Mode' : 'Dark Mode'}
+                                >
+                                    {darkMode ? '☀️' : '🌙'}
+                                </button>
+                            </div>
+                        </div>
+                    </header>
+
+                    {/* Tabs */}
+                    <div className="border-b border-cyan-400/10 sticky top-20 z-40 glass">
+                        <div className="max-w-7xl mx-auto px-4 flex gap-8 overflow-x-auto">
+                            {['overview', 'episodes', 'characters', 'visuals', 'music', 'shots'].map(tab => (
+                                <button
+                                    key={tab}
+                                    onClick={() => setActiveTab(tab)}
+                                    className={`py-4 px-2 font-semibold transition border-b-2 whitespace-nowrap ${
+                                        activeTab === tab 
+                                            ? 'border-cyan-400 text-cyan-300' 
+                                            : 'border-transparent text-slate-400 hover:text-slate-300'
+                                    }`}
+                                >
+                                    {tab.charAt(0).toUpperCase() + tab.slice(1)}
+                                </button>
+                            ))}
+                        </div>
+                    </div>
+
+                    {/* Content */}
+                    <div className="max-w-7xl mx-auto px-4 py-12 fade-in">
+                        {activeTab === 'overview' && <OverviewTab data={data} />}
+                        {activeTab === 'episodes' && <EpisodesTab data={data} />}
+                        {activeTab === 'characters' && <CharactersTab data={data} />}
+                        {activeTab === 'visuals' && <VisualsTab data={data} />}
+                        {activeTab === 'music' && <MusicTab data={data} />}
+                        {activeTab === 'shots' && <ShotsTab data={data} />}
+                    </div>
+                </div>
+            );
+        }
+
+        function OverviewTab({ data }) {
+            const series = data.series;
+            const metrics = data.engine_metrics;
+            
+            return (
+                <div className="space-y-8">
+                    <div className="glass rounded-xl p-8 fade-in">
+                        <h3 className="text-3xl font-bold mb-2 gradient-text">{series.series_title}</h3>
+                        <p className="text-slate-400 text-lg mb-6">{series.series_logline}</p>
+                        <div className="grid md:grid-cols-4 gap-4">
+                            <StatCard label="Episodes" value={series.total_episodes} />
+                            <StatCard label="Avg Cliffhanger" value={metrics.avg_cliffhanger_strength} />
+                            <StatCard label="High Risk Zones" value={metrics.high_risk_segments} />
+                            <StatCard label="Flat Zones" value={metrics.flat_zone_warnings} />
+                        </div>
+                    </div>
+
+                    {/* Metrics Charts */}
+                    <div className="grid md:grid-cols-2 gap-6">
+                        <EmotionalArcChart episodes={series.episodes} />
+                        <RiskPredictionChart episodes={series.episodes} />
+                    </div>
+
+                    {/* Episode Grid */}
+                    <div>
+                        <h3 className="text-2xl font-bold mb-6">Episode Overview</h3>
+                        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+                            {series.episodes.map((ep, idx) => (
+                                <div key={idx} className="glass rounded-lg p-4 hover:border-cyan-400/50 transition hover:scale-105 transform">
+                                    <div className="flex items-center justify-between mb-3">
+                                        <h4 className="font-semibold text-cyan-300">Ep. {ep.episode_number}</h4>
+                                        <span className="text-xs bg-violet-500/30 px-2 py-1 rounded text-violet-200">
+                                            ⚡ {ep.cliffhanger_scoring.strength_score}/10
+                                        </span>
+                                    </div>
+                                    <p className="text-sm text-slate-300 font-semibold">{ep.episode_title}</p>
+                                    <p className="text-xs text-slate-500 mt-2 line-clamp-2">{ep.narrative_breakdown}</p>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+
+        function EpisodesTab({ data }) {
+            const episodes = data.series.episodes;
+            return (
+                <div className="space-y-6">
+                    {episodes.map((ep, idx) => (
+                        <EpisodeDetail key={idx} episode={ep} />
+                    ))}
+                </div>
+            );
+        }
+
+        function EpisodeDetail({ episode }) {
+            const [expanded, setExpanded] = useState(false);
+            
+            return (
+                <div className="glass rounded-xl overflow-hidden hover:border-cyan-400/50 transition">
+                    <button
+                        onClick={() => setExpanded(!expanded)}
+                        className="w-full p-6 text-left flex justify-between items-center hover:bg-cyan-500/5 transition"
+                    >
+                        <div>
+                            <h4 className="text-lg font-semibold text-cyan-300">
+                                Episode {episode.episode_number}: {episode.episode_title}
+                            </h4>
+                            <p className="text-sm text-slate-400 mt-1">{episode.narrative_breakdown.slice(0, 100)}...</p>
+                        </div>
+                        <span className="text-2xl">{expanded ? '−' : '+'}</span>
+                    </button>
+                    
+                    {expanded && (
+                        <div className="border-t border-cyan-400/10 p-6 space-y-6 fade-in">
+                            <div>
+                                <h5 className="font-semibold mb-2 text-cyan-300">Narrative Breakdown</h5>
+                                <p className="text-slate-400">{episode.narrative_breakdown}</p>
+                            </div>
+
+                            <div>
+                                <h5 className="font-semibold mb-3 text-cyan-300">Emotional Arc</h5>
+                                <div className="space-y-2">
+                                    {episode.emotional_arc_analysis.map((arc, idx) => (
+                                        <div key={idx} className="text-sm p-2 rounded bg-slate-800/50">
+                                            <span className="font-mono text-cyan-300">[{arc.time_block}]</span>
+                                            <span className="mx-2">→</span>
+                                            <span className="text-slate-300">{arc.dominant_emotion}</span>
+                                            <span className="float-right text-slate-500">
+                                                {arc.engagement_level}
+                                                {arc.flat_zone_warning && ' ⚠️'}
+                                            </span>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+
+                            <div>
+                                <h5 className="font-semibold mb-2 text-violet-300">Cliffhanger Analysis</h5>
+                                <div className="bg-violet-500/10 rounded-lg p-3 text-sm">
+                                    <p><strong>Score: {episode.cliffhanger_scoring.strength_score}/10</strong></p>
+                                    <p className="text-slate-400 mt-1">{episode.cliffhanger_scoring.explanation}</p>
+                                </div>
+                            </div>
+
+                            <div>
+                                <h5 className="font-semibold mb-2 text-slate-300">Retention Risks</h5>
+                                <div className="space-y-2">
+                                    {episode.retention_risk_prediction.map((risk, idx) => (
+                                        <div key={idx} className="text-sm p-2 bg-orange-500/10 rounded text-orange-300">
+                                            <span className="font-mono">[{risk.drop_off_timestamp}]</span>
+                                            <span className="ml-2 font-semibold">{risk.risk_level}</span>
+                                            <p className="text-slate-400 mt-1">{risk.reason_for_dropoff}</p>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+
+                            <div>
+                                <h5 className="font-semibold mb-2 text-cyan-300">Optimization Suggestions</h5>
+                                <ul className="space-y-1">
+                                    {episode.optimisation_suggestions.map((sug, idx) => (
+                                        <li key={idx} className="text-sm text-slate-400 flex gap-2">
+                                            <span className="text-green-400">✓</span>
+                                            {sug}
+                                        </li>
+                                    ))}
+                                </ul>
+                            </div>
+                        </div>
+                    )}
+                </div>
+            );
+        }
+
+        function CharactersTab({ data }) {
+            const characters = data.character_development?.characters || [];
+            
+            return (
+                <div className="space-y-6">
+                    {characters.length === 0 ? (
+                        <div className="glass rounded-xl p-8 text-center text-slate-400">
+                            Character data not yet generated. Re-run analysis to include.
+                        </div>
+                    ) : (
+                        <>
+                            <div className="glass rounded-xl p-6 fade-in">
+                                <h3 className="font-semibold mb-2 text-cyan-300">Ensemble Dynamics</h3>
+                                <p className="text-slate-400">{data.character_development?.ensemble_dynamics}</p>
+                            </div>
+                            
+                            <div className="grid md:grid-cols-2 gap-6">
+                                {characters.map((char, idx) => (
+                                    <CharacterCard key={idx} character={char} />
+                                ))}
+                            </div>
+                        </>
+                    )}
+                </div>
+            );
+        }
+
+        function CharacterCard({ character }) {
+            const [expanded, setExpanded] = useState(false);
+            
+            return (
+                <div className="glass rounded-xl overflow-hidden hover:border-violet-400/50 transition">
+                    <button
+                        onClick={() => setExpanded(!expanded)}
+                        className="w-full p-6 text-left hover:bg-violet-500/5 transition"
+                    >
+                        <div>
+                            <h4 className="text-lg font-semibold text-violet-300">{character.name}</h4>
+                            <p className="text-sm text-violet-400">{character.archetype}</p>
+                        </div>
+                    </button>
+                    
+                    {expanded && (
+                        <div className="border-t border-violet-400/10 p-6 space-y-4 fade-in">
+                            <div>
+                                <h5 className="font-semibold text-sm mb-1 text-violet-300">Background</h5>
+                                <p className="text-sm text-slate-400">{character.background}</p>
+                            </div>
+                            <div>
+                                <h5 className="font-semibold text-sm mb-1 text-violet-300">Character Arc</h5>
+                                <p className="text-sm text-slate-400">{character.character_arc}</p>
+                            </div>
+                            <div>
+                                <h5 className="font-semibold text-sm mb-1 text-violet-300">Visual Description</h5>
+                                <p className="text-sm text-slate-400">{character.visual_description}</p>
+                            </div>
+                            <div>
+                                <h5 className="font-semibold text-sm mb-2 text-violet-300">Traits</h5>
+                                <div className="flex flex-wrap gap-2">
+                                    {character.traits.map((trait, idx) => (
+                                        <span key={idx} className="text-xs bg-violet-500/30 px-2 py-1 rounded text-violet-200">
+                                            {trait}
+                                        </span>
+                                    ))}
+                                </div>
+                            </div>
+                        </div>
+                    )}
+                </div>
+            );
+        }
+
+        function VisualsTab({ data }) {
+            const moodBoard = data.visual_mood_board || {};
+            
+            return (
+                <div className="space-y-6">
+                    <div className="glass rounded-xl p-8 fade-in">
+                        <h3 className="text-2xl font-bold mb-6 text-cyan-300">Visual Mood Board</h3>
+                        
+                        {moodBoard.color_palette && (
+                            <div className="mb-8">
+                                <h4 className="font-semibold mb-4 text-violet-300">Color Palette</h4>
+                                <div className="flex flex-wrap gap-4 mb-3">
+                                    {(moodBoard.color_palette.primary || []).slice(0, 3).map((color, idx) => (
+                                        <div key={idx} className="flex items-center gap-2 hover:scale-110 transition transform">
+                                            <div 
+                                                className="w-12 h-12 rounded-lg border-2 border-cyan-400/50 shadow-lg"
+                                                style={{backgroundColor: color}}
+                                            ></div>
+                                            <span className="text-sm font-mono text-cyan-300">{color}</span>
+                                        </div>
+                                    ))}
+                                </div>
+                                <p className="text-sm text-slate-400">{moodBoard.color_palette.reasoning}</p>
+                            </div>
+                        )}
+
+                        {moodBoard.camera_style && (
+                            <div className="mb-6 p-4 bg-cyan-500/10 rounded-lg border border-cyan-400/20">
+                                <h4 className="font-semibold mb-2 text-cyan-300">Camera Style</h4>
+                                <p className="text-sm text-slate-400">{moodBoard.camera_style}</p>
+                            </div>
+                        )}
+
+                        {moodBoard.lighting_design && (
+                            <div className="mb-6 p-4 bg-violet-500/10 rounded-lg border border-violet-400/20">
+                                <h4 className="font-semibold mb-2 text-violet-300">Lighting Design</h4>
+                                <p className="text-sm text-slate-400">{moodBoard.lighting_design}</p>
+                            </div>
+                        )}
+
+                        {moodBoard.locations && (
+                            <div className="mb-6">
+                                <h4 className="font-semibold mb-2 text-cyan-300">Recommended Locations</h4>
+                                <div className="flex flex-wrap gap-2">
+                                    {moodBoard.locations.map((loc, idx) => (
+                                        <span key={idx} className="text-sm bg-slate-700/50 px-3 py-1 rounded-full hover:bg-cyan-500/30 transition text-cyan-200">
+                                            📍 {loc}
+                                        </span>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+
+                        {moodBoard.vfx_suggestions && (
+                            <div>
+                                <h4 className="font-semibold mb-2 text-violet-300">VFX Suggestions</h4>
+                                <ul className="space-y-1">
+                                    {moodBoard.vfx_suggestions.map((vfx, idx) => (
+                                        <li key={idx} className="text-sm text-slate-400 flex gap-2 hover:text-violet-300 transition">
+                                            <span>✨</span> {vfx}
+                                        </li>
+                                    ))}
+                                </ul>
+                            </div>
+                        )}
+                    </div>
+                </div>
+            );
+        }
+
+        function MusicTab({ data }) {
+            const music = data.music_recommendations || {};
+            
+            return (
+                <div className="space-y-6 fade-in">
+                    <div className="glass rounded-xl p-8">
+                        <h3 className="text-2xl font-bold mb-6 text-cyan-300">Music & Sound Design</h3>
+
+                        {music.opening_theme && (
+                            <div className="mb-8 p-4 bg-gradient-to-r from-cyan-500/10 to-violet-500/10 rounded-lg border border-cyan-400/20">
+                                <h4 className="font-semibold mb-3 text-cyan-300">Opening Theme</h4>
+                                <div className="grid md:grid-cols-2 gap-4 text-sm">
+                                    <div>
+                                        <p className="text-slate-400">Genre</p>
+                                        <p className="font-semibold text-cyan-200">{music.opening_theme.genre}</p>
+                                    </div>
+                                    <div>
+                                        <p className="text-slate-400">Tempo</p>
+                                        <p className="font-semibold text-violet-200">{music.opening_theme.tempo_bpm} BPM</p>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+
+                        {music.background_music && (
+                            <div className="mb-8">
+                                <h4 className="font-semibold mb-4 text-cyan-300">Background Music by Emotion</h4>
+                                <div className="space-y-3">
+                                    {music.background_music.map((bg, idx) => (
+                                        <div key={idx} className="p-3 bg-slate-800/50 rounded-lg border border-cyan-400/20 hover:border-cyan-400/50 transition">
+                                            <p className="font-semibold text-cyan-300">{bg.emotion}</p>
+                                            <p className="text-sm text-slate-400">{bg.genre}</p>
+                                            {bg.reference_artists && (
+                                                <p className="text-xs text-slate-500 mt-1">
+                                                    Ref: {bg.reference_artists.join(', ')}
+                                                </p>
+                                            )}
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+
+                        {music.sound_effects && (
+                            <div className="mb-8">
+                                <h4 className="font-semibold mb-3 text-violet-300">Sound Effects</h4>
+                                <div className="flex flex-wrap gap-2">
+                                    {music.sound_effects.map((sfx, idx) => (
+                                        <span key={idx} className="text-xs bg-green-500/20 px-2 py-1 rounded text-green-300 hover:bg-green-500/40 transition">
+                                            🔊 {sfx}
+                                        </span>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+
+                        {music.silence_placement && (
+                            <div>
+                                <h4 className="font-semibold mb-2 text-cyan-300">Silence & Breathing Room</h4>
+                                <ul className="space-y-1">
+                                    {music.silence_placement.map((placement, idx) => (
+                                        <li key={idx} className="text-sm text-slate-400">⏸️ {placement}</li>
+                                    ))}
+                                </ul>
+                            </div>
+                        )}
+                    </div>
+                </div>
+            );
+        }
+
+        function ShotsTab({ data }) {
+            const shots = data.shot_composition || {};
+            
+            return (
+                <div className="space-y-6 fade-in">
+                    <div className="glass rounded-xl p-8">
+                        <h3 className="text-2xl font-bold mb-6 text-violet-300">Shot Composition Guide</h3>
+
+                        {shots.shot_breakdown && (
+                            <div className="mb-8 space-y-4">
+                                {shots.shot_breakdown.map((shot, idx) => (
+                                    <div key={idx} className="p-4 border-2 border-cyan-400/20 rounded-lg hover:bg-cyan-500/5 hover:border-cyan-400/50 transition">
+                                        <div className="flex justify-between items-start mb-2">
+                                            <h4 className="font-semibold text-cyan-300">{shot.time_block}</h4>
+                                            <span className="text-xs bg-cyan-500/20 px-2 py-1 rounded text-cyan-200">{shot.shot_type}</span>
+                                        </div>
+                                        <p className="text-sm text-slate-400 mb-3">{shot.purpose}</p>
+                                        <div className="grid grid-cols-2 gap-2 text-xs">
+                                            <div>
+                                                <span className="text-slate-500">Movement:</span>
+                                                <p className="text-slate-300">{shot.camera_movement}</p>
+                                            </div>
+                                            <div>
+                                                <span className="text-slate-500">Framing:</span>
+                                                <p className="text-slate-300">{shot.framing}</p>
+                                            </div>
+                                            <div>
+                                                <span className="text-slate-500">DoF:</span>
+                                                <p className="text-slate-300">{shot.depth_of_field}</p>
+                                            </div>
+                                            <div>
+                                                <span className="text-slate-500">Focus:</span>
+                                                <p className="text-slate-300">{shot.focus_pulling}</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+
+                        {shots.technical_notes && (
+                            <div className="p-4 bg-slate-700/30 rounded-lg mb-6 border border-slate-600/50">
+                                <h4 className="font-semibold mb-2 text-violet-300">Technical Notes</h4>
+                                <p className="text-sm text-slate-400">{shots.technical_notes}</p>
+                            </div>
+                        )}
+
+                        {shots.equipment_suggestions && (
+                            <div>
+                                <h4 className="font-semibold mb-2 text-cyan-300">Recommended Equipment</h4>
+                                <div className="flex flex-wrap gap-2">
+                                    {shots.equipment_suggestions.map((eq, idx) => (
+                                        <span key={idx} className="text-xs bg-orange-500/20 px-2 py-1 rounded text-orange-300 hover:bg-orange-500/40 transition">
+                                            🎥 {eq}
+                                        </span>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+                    </div>
+                </div>
+            );
+        }
+
+        // Helper Components
+        function StatCard({ label, value }) {
+            return (
+                <div className="border-2 border-cyan-400/30 rounded-lg p-4 text-center hover:border-cyan-400/50 transition hover:scale-105 transform">
+                    <p className="text-slate-400 text-sm mb-1">{label}</p>
+                    <p className="text-2xl font-bold text-cyan-300">{value}</p>
+                </div>
+            );
+        }
+
+        function EmotionalArcChart({ episodes }) {
+            const chartRef = useRef(null);
+            const chartInstance = useRef(null);
+
+            useEffect(() => {
+                if (!chartRef.current || !episodes.length) return;
+
+                const ctx = chartRef.current.getContext('2d');
+                
+                const emotionCounts = {};
+                
+                episodes.forEach((ep, eIdx) => {
+                    ep.emotional_arc_analysis?.forEach((arc) => {
+                        const emotion = arc.dominant_emotion || 'Unknown';
+                        emotionCounts[emotion] = (emotionCounts[emotion] || 0) + 1;
+                    });
+                });
+
+                const colors = ['#7dd3fc', '#c084fc', '#f472b6', '#f97316', '#eab308', '#22c55e'];
+                const data = {
+                    labels: Object.keys(emotionCounts),
+                    datasets: [{
+                        data: Object.values(emotionCounts),
+                        backgroundColor: colors.slice(0, Object.keys(emotionCounts).length),
+                        borderColor: 'rgba(125, 211, 252, 0.3)',
+                        borderWidth: 2
+                    }]
+                };
+
+                if (chartInstance.current) {
+                    chartInstance.current.destroy();
+                }
+
+                chartInstance.current = new Chart(ctx, {
+                    type: 'doughnut',
+                    data: data,
+                    options: {
+                        responsive: true,
+                        plugins: {
+                            legend: {
+                                labels: {
+                                    color: '#cbd5e1',
+                                    font: { family: "'Inter', sans-serif" }
+                                }
+                            }
+                        }
+                    }
+                });
+
+                return () => {
+                    if (chartInstance.current) {
+                        chartInstance.current.destroy();
+                    }
+                };
+            }, [episodes]);
+
+            return (
+                <div className="glass rounded-xl p-6 fade-in">
+                    <h4 className="font-semibold mb-4 text-cyan-300">Emotional Arc Distribution</h4>
+                    <canvas ref={chartRef}></canvas>
+                </div>
+            );
+        }
+
+        function RiskPredictionChart({ episodes }) {
+            const chartRef = useRef(null);
+            const chartInstance = useRef(null);
+
+            useEffect(() => {
+                if (!chartRef.current || !episodes.length) return;
+
+                const ctx = chartRef.current.getContext('2d');
+                
+                const labels = episodes.map((ep, idx) => `Ep. ${ep.episode_number}`);
+                const highRisk = [];
+                const mediumRisk = [];
+                const lowRisk = [];
+
+                episodes.forEach((ep) => {
+                    let high = 0, medium = 0, low = 0;
+                    ep.retention_risk_prediction?.forEach((risk) => {
+                        const level = (risk.risk_level || '').toLowerCase();
+                        if (level.includes('high')) high++;
+                        else if (level.includes('medium')) medium++;
+                        else low++;
+                    });
+                    highRisk.push(high);
+                    mediumRisk.push(medium);
+                    lowRisk.push(low);
+                });
+
+                const data = {
+                    labels: labels,
+                    datasets: [
+                        {
+                            label: 'High Risk',
+                            data: highRisk,
+                            backgroundColor: '#ef4444'
+                        },
+                        {
+                            label: 'Medium Risk',
+                            data: mediumRisk,
+                            backgroundColor: '#f97316'
+                        },
+                        {
+                            label: 'Low Risk',
+                            data: lowRisk,
+                            backgroundColor: '#22c55e'
+                        }
+                    ]
+                };
+
+                if (chartInstance.current) {
+                    chartInstance.current.destroy();
+                }
+
+                chartInstance.current = new Chart(ctx, {
+                    type: 'bar',
+                    data: data,
+                    options: {
+                        responsive: true,
+                        stacked: true,
+                        plugins: {
+                            legend: {
+                                labels: {
+                                    color: '#cbd5e1',
+                                    font: { family: "'Inter', sans-serif" }
+                                }
+                            }
+                        },
+                        scales: {
+                            x: {
+                                stacked: true,
+                                ticks: { color: '#cbd5e1' },
+                                grid: { color: 'rgba(125, 211, 252, 0.1)' }
+                            },
+                            y: {
+                                stacked: true,
+                                ticks: { color: '#cbd5e1' },
+                                grid: { color: 'rgba(125, 211, 252, 0.1)' }
+                            }
+                        }
+                    }
+                });
+
+                return () => {
+                    if (chartInstance.current) {
+                        chartInstance.current.destroy();
+                    }
+                };
+            }, [episodes]);
+
+            return (
+                <div className="glass rounded-xl p-6 fade-in">
+                    <h4 className="font-semibold mb-4 text-violet-300">Risk Prediction by Episode</h4>
+                    <canvas ref={chartRef}></canvas>
+                </div>
+            );
+        }
+
+        // Render the App
+        ReactDOM.createRoot(document.getElementById('root')).render(
+            <React.StrictMode>
+                <App />
+            </React.StrictMode>
+        );
+    </script>
+            return (
+                <div className="min-h-screen w-full">
+                    {/* Header */}
+                    <header className="border-b border-blue-500/20 backdrop-blur glass">
+                        <div className="max-w-7xl mx-auto px-4 py-6">
+                            <div className="flex items-center justify-between">
+                                <div className="flex items-center gap-3">
+                                    <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
+                                        <span className="text-white font-bold text-lg">V</span>
+                                    </div>
+                                    <div>
+                                        <h1 className="text-2xl font-bold gradient-text">VBOX</h1>
+                                        <p className="text-xs text-blue-300">Episodic Intelligence Engine</p>
+                                    </div>
+                                </div>
+                                <div className="flex gap-4">
+                                    <button className="px-4 py-2 text-sm hover:text-blue-300 transition">Docs</button>
+                                    <button className="px-4 py-2 text-sm hover:text-blue-300 transition">Guide</button>
+                                </div>
+                            </div>
+                        </div>
+                    </header>
+
+                    {/* Hero Section */}
+                    <section className="relative py-20 px-4 overflow-hidden">
+                        <div className="absolute top-0 left-1/4 w-96 h-96 bg-blue-500/10 rounded-full blur-3xl"></div>
+                        <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl"></div>
+                        
+                        <div className="max-w-4xl mx-auto relative z-10 text-center">
+                            <h2 className="text-5xl md:text-6xl font-bold mb-6">
+                                Turn Your Story into
+                                <span className="block gradient-text">Engaging Vertical Series</span>
+                            </h2>
+                            <p className="text-xl text-slate-400 mb-8">
+                                AI-powered narrative intelligence: character development, visual mood boards, 
+                                dialogue suggestions, music recommendations, and shot composition guidance—all in one platform.
+                            </p>
+                        </div>
+                    </section>
+
+                    {/* Main Form Section */}
+                    <section className="py-12 px-4">
+                        <div className="max-w-3xl mx-auto">
+                            <div className="glass rounded-2xl p-8 md:p-10">
+                                <h3 className="text-2xl font-bold mb-8">Create Your Series</h3>
+                                
+                                <form onSubmit={handleSubmit} className="space-y-6">
+                                    {/* Core Idea Textarea */}
+                                    <div>
+                                        <label className="block text-sm font-semibold mb-2">Your Story Idea</label>
+                                        <textarea
+                                            value={formData.core_idea}
+                                            onChange={(e) => setFormData({...formData, core_idea: e.target.value})}
+                                            placeholder="Describe the core concept for your vertical series (90-second episodes)..."
+                                            className="w-full bg-slate-900/50 border border-blue-500/20 rounded-xl p-4 text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500 h-32 resize-none"
+                                            required
+                                        />
+                                    </div>
+
+                                    {/* Grid of Controls */}
+                                    <div className="grid md:grid-cols-2 gap-6">
+                                        <div>
+                                            <label className="block text-sm font-semibold mb-2">Episodes</label>
+                                            <select
+                                                value={formData.episode_count}
+                                                onChange={(e) => setFormData({...formData, episode_count: parseInt(e.target.value)})}
+                                                className="w-full bg-slate-900/50 border border-blue-500/20 rounded-xl p-3 text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                            >
+                                                {[5,6,7,8].map(n => <option key={n} value={n}>{n} Episodes</option>)}
+                                            </select>
+                                        </div>
+
+                                        <div>
+                                            <label className="block text-sm font-semibold mb-2">Genre</label>
+                                            <select
+                                                value={formData.genre}
+                                                onChange={(e) => setFormData({...formData, genre: e.target.value})}
+                                                className="w-full bg-slate-900/50 border border-blue-500/20 rounded-xl p-3 text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                            >
+                                                <option>Drama</option>
+                                                <option>Comedy</option>
+                                                <option>Thriller</option>
+                                                <option>Romance</option>
+                                                <option>Sci-Fi</option>
+                                                <option>Fantasy</option>
+                                            </select>
+                                        </div>
+
+                                        <div>
+                                            <label className="block text-sm font-semibold mb-2">Tone</label>
+                                            <select
+                                                value={formData.tone}
+                                                onChange={(e) => setFormData({...formData, tone: e.target.value})}
+                                                className="w-full bg-slate-900/50 border border-blue-500/20 rounded-xl p-3 text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                            >
+                                                <option>Dramatic</option>
+                                                <option>Light-hearted</option>
+                                                <option>Suspenseful</option>
+                                                <option>Romantic</option>
+                                                <option>Adventurous</option>
+                                            </select>
+                                        </div>
+
+                                        <div>
+                                            <label className="block text-sm font-semibold mb-2">Target Audience</label>
+                                            <select
+                                                value={formData.target_audience}
+                                                onChange={(e) => setFormData({...formData, target_audience: e.target.value})}
+                                                className="w-full bg-slate-900/50 border border-blue-500/20 rounded-xl p-3 text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                            >
+                                                <option>13-17</option>
+                                                <option>18-35</option>
+                                                <option>35-50</option>
+                                                <option>50+</option>
+                                                <option>All Ages</option>
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                    {/* Submit Button */}
+                                    <button
+                                        type="submit"
+                                        disabled={loading}
+                                        className="w-full btn-primary text-white font-semibold py-4 rounded-xl hover:shadow-lg disabled:opacity-50 transition"
+                                    >
+                                        {loading ? (
+                                            <span className="flex items-center justify-center gap-2">
+                                                <span className="animate-spin">⏳</span>
+                                                Generating Your Series...
+                                            </span>
+                                        ) : (
+                                            'Generate Series'
+                                        )}
+                                    </button>
+                                </form>
+
+                                {/* Features Preview */}
+                                <div className="mt-12 pt-8 border-t border-blue-500/10">
+                                    <h4 className="text-sm font-semibold text-blue-300 mb-4">What You'll Get:</h4>
+                                    <div className="grid md:grid-cols-3 gap-4 text-sm">
+                                        <div className="flex gap-3">
+                                            <span className="text-purple-400">✨</span>
+                                            <span>Character Development Arcs</span>
+                                        </div>
+                                        <div className="flex gap-3">
+                                            <span className="text-purple-400">🎬</span>
+                                            <span>Shot Composition Guide</span>
+                                        </div>
+                                        <div className="flex gap-3">
+                                            <span className="text-purple-400">🎵</span>
+                                            <span>Music Recommendations</span>
+                                        </div>
+                                        <div className="flex gap-3">
+                                            <span className="text-purple-400">🎨</span>
+                                            <span>Visual Mood Boards</span>
+                                        </div>
+                                        <div className="flex gap-3">
+                                            <span className="text-purple-400">💬</span>
+                                            <span>Dialogue Suggestions</span>
+                                        </div>
+                                        <div className="flex gap-3">
+                                            <span className="text-purple-400">📊</span>
+                                            <span>Emotional Arc Analysis</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    {/* Info Section */}
+                    <section className="py-20 px-4 border-t border-blue-500/10">
+                        <div className="max-w-5xl mx-auto">
+                            <h3 className="text-3xl font-bold text-center mb-12">Advanced Features</h3>
+                            <div className="grid md:grid-cols-2 gap-8">
+                                <FeatureCard 
+                                    icon="✨" 
+                                    title="AI-Powered Analysis" 
+                                    desc="Google Gemini AI analyzes your story and creates episodic breakdowns optimized for engagement"
+                                />
+                                <FeatureCard 
+                                    icon="🎬" 
+                                    title="Multi-Section Guidance" 
+                                    desc="Get detailed recommendations for visuals, dialogue, music, shots, and character development"
+                                />
+                                <FeatureCard 
+                                    icon="📊" 
+                                    title="Rich Visualizations" 
+                                    desc="Interactive charts showing emotional arcs, risk prediction, and retention analytics"
+                                />
+                                <FeatureCard 
+                                    icon="🔊" 
+                                    title="Text-to-Speech" 
+                                    desc="Preview your narratives with professional voice narration (coming soon)"
+                                />
+                            </div>
+                        </div>
+                    </section>
+                </div>
+            );
+        }
+
+        function FeatureCard({ icon, title, desc }) {
+            return (
+                <div className="glass rounded-xl p-6 hover:border-blue-400/50 transition">
+                    <div className="text-3xl mb-3">{icon}</div>
+                    <h4 className="text-lg font-semibold mb-2">{title}</h4>
+                    <p className="text-slate-400 text-sm">{desc}</p>
+                </div>
+            );
+        }
+
+        // Results Page Component
+        function ResultsPage({ data, setCurrentView }) {
+            const [activeTab, setActiveTab] = useState('overview');
+            
+            return (
+                <div className="min-h-screen w-full">
+                    {/* Header with Back Button */}
+                    <header className="border-b border-blue-500/20 glass sticky top-0 z-50">
+                        <div className="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
+                            <button 
+                                onClick={() => setCurrentView('home')}
+                                className="flex items-center gap-2 text-blue-300 hover:text-blue-200 transition"
+                            >
+                                ← Back
+                            </button>
+                            <h2 className="text-2xl font-bold">Series Analysis</h2>
+                            <div className="w-16"></div>
+                        </div>
+                    </header>
+
+                    {/* Tabs */}
+                    <div className="border-b border-blue-500/10">
+                        <div className="max-w-7xl mx-auto px-4 flex gap-8">
+                            {['overview', 'episodes', 'characters', 'visuals', 'music', 'shots'].map(tab => (
+                                <button
+                                    key={tab}
+                                    onClick={() => setActiveTab(tab)}
+                                    className={`py-4 px-2 font-semibold transition border-b-2 ${
+                                        activeTab === tab 
+                                            ? 'border-blue-500 text-blue-300' 
+                                            : 'border-transparent text-slate-400 hover:text-slate-300'
+                                    }`}
+                                >
+                                    {tab.charAt(0).toUpperCase() + tab.slice(1)}
+                                </button>
+                            ))}
+                        </div>
+                    </div>
+
+                    {/* Content */}
+                    <div className="max-w-7xl mx-auto px-4 py-12">
+                        {activeTab === 'overview' && <OverviewTab data={data} />}
+                        {activeTab === 'episodes' && <EpisodesTab data={data} />}
+                        {activeTab === 'characters' && <CharactersTab data={data} />}
+                        {activeTab === 'visuals' && <VisualsTab data={data} />}
+                        {activeTab === 'music' && <MusicTab data={data} />}
+                        {activeTab === 'shots' && <ShotsTab data={data} />}
+                    </div>
+                </div>
+            );
+        }
+
+        function OverviewTab({ data }) {
+            const series = data.series;
+            const metrics = data.engine_metrics;
+            
+            return (
+                <div className="space-y-8">
+                    <div className="glass rounded-xl p-8">
+                        <h3 className="text-3xl font-bold mb-2">{series.series_title}</h3>
+                        <p className="text-slate-400 text-lg mb-6">{series.series_logline}</p>
+                        <div className="grid md:grid-cols-4 gap-4">
+                            <StatCard label="Episodes" value={series.total_episodes} />
+                            <StatCard label="Avg Cliffhanger" value={metrics.avg_cliffhanger_strength} />
+                            <StatCard label="High Risk Zones" value={metrics.high_risk_segments} />
+                            <StatCard label="Flat Zones" value={metrics.flat_zone_warnings} />
+                        </div>
+                    </div>
+
+                    {/* Metrics Charts */}
+                    <div className="grid md:grid-cols-2 gap-6">
+                        <EmotionalArcChart episodes={series.episodes} />
+                        <RiskPredictionChart episodes={series.episodes} />
+                    </div>
+
+                    {/* Episode Grid */}
+                    <div>
+                        <h3 className="text-2xl font-bold mb-6">Episode Overview</h3>
+                        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+                            {series.episodes.map((ep, idx) => (
+                                <div key={idx} className="glass rounded-lg p-4 hover:border-blue-400/50 transition">
+                                    <div className="flex items-center justify-between mb-3">
+                                        <h4 className="font-semibold">Ep. {ep.episode_number}</h4>
+                                        <span className="text-xs bg-blue-500/20 px-2 py-1 rounded">
+                                            ⚡ {ep.cliffhanger_scoring.strength_score}/10
+                                        </span>
+                                    </div>
+                                    <p className="text-sm text-slate-400">{ep.episode_title}</p>
+                                    <p className="text-xs text-slate-500 mt-2 line-clamp-2">{ep.narrative_breakdown}</p>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+
+        function EpisodesTab({ data }) {
+            const episodes = data.series.episodes;
+            return (
+                <div className="space-y-6">
+                    {episodes.map((ep, idx) => (
+                        <EpisodeDetail key={idx} episode={ep} />
+                    ))}
+                </div>
+            );
+        }
+
+        function EpisodeDetail({ episode }) {
+            const [expanded, setExpanded] = useState(false);
+            
+            return (
+                <div className="glass rounded-xl overflow-hidden">
+                    <button
+                        onClick={() => setExpanded(!expanded)}
+                        className="w-full p-6 text-left flex justify-between items-center hover:bg-blue-500/5 transition"
+                    >
+                        <div>
+                            <h4 className="text-lg font-semibold">
+                                Episode {episode.episode_number}: {episode.episode_title}
+                            </h4>
+                            <p className="text-sm text-slate-400 mt-1">{episode.narrative_breakdown.slice(0, 100)}...</p>
+                        </div>
+                        <span className="text-2xl">{expanded ? '−' : '+'}</span>
+                    </button>
+                    
+                    {expanded && (
+                        <div className="border-t border-blue-500/10 p-6 space-y-6">
+                            <div>
+                                <h5 className="font-semibold mb-2">Narrative Breakdown</h5>
+                                <p className="text-slate-400">{episode.narrative_breakdown}</p>
+                            </div>
+
+                            <div>
+                                <h5 className="font-semibold mb-3">Emotional Arc</h5>
+                                <div className="space-y-2">
+                                    {episode.emotional_arc_analysis.map((arc, idx) => (
+                                        <div key={idx} className="text-sm">
+                                            <span className="font-mono text-blue-300">[{arc.time_block}]</span>
+                                            <span className="mx-2">→</span>
+                                            <span className="text-slate-300">{arc.dominant_emotion}</span>
+                                            <span className="float-right text-slate-500">
+                                                {arc.engagement_level}
+                                                {arc.flat_zone_warning && ' ⚠️'}
+                                            </span>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+
+                            <div>
+                                <h5 className="font-semibold mb-2">Cliffhanger Analysis</h5>
+                                <div className="bg-blue-500/10 rounded-lg p-3 text-sm">
+                                    <p><strong>Score: {episode.cliffhanger_scoring.strength_score}/10</strong></p>
+                                    <p className="text-slate-400 mt-1">{episode.cliffhanger_scoring.explanation}</p>
+                                </div>
+                            </div>
+
+                            <div>
+                                <h5 className="font-semibold mb-2">Retention Risks</h5>
+                                <div className="space-y-2">
+                                    {episode.retention_risk_prediction.map((risk, idx) => (
+                                        <div key={idx} className="text-sm p-2 bg-orange-500/10 rounded">
+                                            <span className="font-mono text-orange-300">[{risk.drop_off_timestamp}]</span>
+                                            <span className="ml-2 font-semibold">{risk.risk_level}</span>
+                                            <p className="text-slate-400 mt-1">{risk.reason_for_dropoff}</p>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+
+                            <div>
+                                <h5 className="font-semibold mb-2">Optimization Suggestions</h5>
+                                <ul className="space-y-1">
+                                    {episode.optimisation_suggestions.map((sug, idx) => (
+                                        <li key={idx} className="text-sm text-slate-400 flex gap-2">
+                                            <span className="text-green-400">→</span>
+                                            {sug}
+                                        </li>
+                                    ))}
+                                </ul>
+                            </div>
+                        </div>
+                    )}
+                </div>
+            );
+        }
+
+        function CharactersTab({ data }) {
+            const characters = data.character_development?.characters || [];
+            
+            return (
+                <div className="space-y-6">
+                    {characters.length === 0 ? (
+                        <div className="glass rounded-xl p-8 text-center text-slate-400">
+                            Character data not yet generated. Re-run analysis to include.
+                        </div>
+                    ) : (
+                        <>
+                            <div className="glass rounded-xl p-6">
+                                <h3 className="font-semibold mb-2">Ensemble Dynamics</h3>
+                                <p className="text-slate-400">{data.character_development?.ensemble_dynamics}</p>
+                            </div>
+                            
+                            <div className="grid md:grid-cols-2 gap-6">
+                                {characters.map((char, idx) => (
+                                    <CharacterCard key={idx} character={char} />
+                                ))}
+                            </div>
+                        </>
+                    )}
+                </div>
+            );
+        }
+
+        function CharacterCard({ character }) {
+            const [expanded, setExpanded] = useState(false);
+            
+            return (
+                <div className="glass rounded-xl overflow-hidden">
+                    <button
+                        onClick={() => setExpanded(!expanded)}
+                        className="w-full p-6 text-left hover:bg-purple-500/5 transition"
+                    >
+                        <div>
+                            <h4 className="text-lg font-semibold">{character.name}</h4>
+                            <p className="text-sm text-purple-400">{character.archetype}</p>
+                        </div>
+                    </button>
+                    
+                    {expanded && (
+                        <div className="border-t border-purple-500/10 p-6 space-y-4">
+                            <div>
+                                <h5 className="font-semibold text-sm mb-1">Background</h5>
+                                <p className="text-sm text-slate-400">{character.background}</p>
+                            </div>
+                            <div>
+                                <h5 className="font-semibold text-sm mb-1">Character Arc</h5>
+                                <p className="text-sm text-slate-400">{character.character_arc}</p>
+                            </div>
+                            <div>
+                                <h5 className="font-semibold text-sm mb-1">Visual Description</h5>
+                                <p className="text-sm text-slate-400">{character.visual_description}</p>
+                            </div>
+                            <div>
+                                <h5 className="font-semibold text-sm mb-2">Traits</h5>
+                                <div className="flex flex-wrap gap-2">
+                                    {character.traits.map((trait, idx) => (
+                                        <span key={idx} className="text-xs bg-purple-500/20 px-2 py-1 rounded">
+                                            {trait}
+                                        </span>
+                                    ))}
+                                </div>
+                            </div>
+                        </div>
+                    )}
+                </div>
+            );
+        }
+
+        function VisualsTab({ data }) {
+            const moodBoard = data.visual_mood_board || {};
+            
+            return (
+                <div className="space-y-6">
+                    <div className="glass rounded-xl p-8">
+                        <h3 className="text-2xl font-bold mb-6">Visual Mood Board</h3>
+                        
+                        {/* Color Palette */}
+                        {moodBoard.color_palette && (
+                            <div className="mb-8">
+                                <h4 className="font-semibold mb-4">Color Palette</h4>
+                                <div className="flex flex-wrap gap-4 mb-3">
+                                    {(moodBoard.color_palette.primary || []).slice(0, 3).map((color, idx) => (
+                                        <div key={idx} className="flex items-center gap-2">
+                                            <div 
+                                                className="w-12 h-12 rounded-lg border border-slate-600"
+                                                style={{backgroundColor: color}}
+                                            ></div>
+                                            <span className="text-sm font-mono">{color}</span>
+                                        </div>
+                                    ))}
+                                </div>
+                                <p className="text-sm text-slate-400">{moodBoard.color_palette.reasoning}</p>
+                            </div>
+                        )}
+
+                        {/* Camera Style */}
+                        {moodBoard.camera_style && (
+                            <div className="mb-6 p-4 bg-blue-500/10 rounded-lg">
+                                <h4 className="font-semibold mb-2">Camera Style</h4>
+                                <p className="text-sm text-slate-400">{moodBoard.camera_style}</p>
+                            </div>
+                        )}
+
+                        {/* Lighting */}
+                        {moodBoard.lighting_design && (
+                            <div className="mb-6 p-4 bg-yellow-500/10 rounded-lg">
+                                <h4 className="font-semibold mb-2">Lighting Design</h4>
+                                <p className="text-sm text-slate-400">{moodBoard.lighting_design}</p>
+                            </div>
+                        )}
+
+                        {/* Locations */}
+                        {moodBoard.locations && (
+                            <div className="mb-6">
+                                <h4 className="font-semibold mb-2">Recommended Locations</h4>
+                                <div className="flex flex-wrap gap-2">
+                                    {moodBoard.locations.map((loc, idx) => (
+                                        <span key={idx} className="text-sm bg-slate-700/50 px-3 py-1 rounded-full">
+                                            {loc}
+                                        </span>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+
+                        {/* VFX */}
+                        {moodBoard.vfx_suggestions && (
+                            <div>
+                                <h4 className="font-semibold mb-2">VFX Suggestions</h4>
+                                <ul className="space-y-1">
+                                    {moodBoard.vfx_suggestions.map((vfx, idx) => (
+                                        <li key={idx} className="text-sm text-slate-400 flex gap-2">
+                                            <span>✨</span> {vfx}
+                                        </li>
+                                    ))}
+                                </ul>
+                            </div>
+                        )}
+                    </div>
+                </div>
+            );
+        }
+
+        function MusicTab({ data }) {
+            const music = data.music_recommendations || {};
+            
+            return (
+                <div className="space-y-6">
+                    <div className="glass rounded-xl p-8">
+                        <h3 className="text-2xl font-bold mb-6">Music & Sound Design</h3>
+
+                        {/* Opening Theme */}
+                        {music.opening_theme && (
+                            <div className="mb-8 p-4 bg-gradient-to-r from-blue-500/10 to-purple-500/10 rounded-lg">
+                                <h4 className="font-semibold mb-3">Opening Theme</h4>
+                                <div className="grid md:grid-cols-2 gap-4 text-sm">
+                                    <div>
+                                        <p className="text-slate-400">Genre</p>
+                                        <p className="font-semibold">{music.opening_theme.genre}</p>
+                                    </div>
+                                    <div>
+                                        <p className="text-slate-400">Tempo</p>
+                                        <p className="font-semibold">{music.opening_theme.tempo_bpm} BPM</p>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Background Music */}
+                        {music.background_music && (
+                            <div className="mb-8">
+                                <h4 className="font-semibold mb-4">Background Music by Emotion</h4>
+                                <div className="space-y-3">
+                                    {music.background_music.map((bg, idx) => (
+                                        <div key={idx} className="p-3 bg-slate-800/50 rounded-lg">
+                                            <p className="font-semibold text-blue-300">{bg.emotion}</p>
+                                            <p className="text-sm text-slate-400">{bg.genre}</p>
+                                            {bg.reference_artists && (
+                                                <p className="text-xs text-slate-500 mt-1">
+                                                    Ref: {bg.reference_artists.join(', ')}
+                                                </p>
+                                            )}
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Sound Effects */}
+                        {music.sound_effects && (
+                            <div className="mb-8">
+                                <h4 className="font-semibold mb-3">Sound Effects</h4>
+                                <div className="flex flex-wrap gap-2">
+                                    {music.sound_effects.map((sfx, idx) => (
+                                        <span key={idx} className="text-xs bg-green-500/20 px-2 py-1 rounded">
+                                            {sfx}
+                                        </span>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Silence Placement */}
+                        {music.silence_placement && (
+                            <div>
+                                <h4 className="font-semibold mb-2">Silence & Breathing Room</h4>
+                                <ul className="space-y-1">
+                                    {music.silence_placement.map((placement, idx) => (
+                                        <li key={idx} className="text-sm text-slate-400">⏸️ {placement}</li>
+                                    ))}
+                                </ul>
+                            </div>
+                        )}
+                    </div>
+                </div>
+            );
+        }
+
+        function ShotsTab({ data }) {
+            const shots = data.shot_composition || {};
+            
+            return (
+                <div className="space-y-6">
+                    <div className="glass rounded-xl p-8">
+                        <h3 className="text-2xl font-bold mb-6">Shot Composition Guide</h3>
+
+                        {/* Shot Breakdown */}
+                        {shots.shot_breakdown && (
+                            <div className="mb-8 space-y-4">
+                                {shots.shot_breakdown.map((shot, idx) => (
+                                    <div key={idx} className="p-4 border border-cyan-500/20 rounded-lg hover:bg-cyan-500/5 transition">
+                                        <div className="flex justify-between items-start mb-2">
+                                            <h4 className="font-semibold text-cyan-300">{shot.time_block}</h4>
+                                            <span className="text-xs bg-cyan-500/20 px-2 py-1 rounded">{shot.shot_type}</span>
+                                        </div>
+                                        <p className="text-sm text-slate-400 mb-3">{shot.purpose}</p>
+                                        <div className="grid grid-cols-2 gap-2 text-xs">
+                                            <div>
+                                                <span className="text-slate-500">Movement:</span>
+                                                <p className="text-slate-300">{shot.camera_movement}</p>
+                                            </div>
+                                            <div>
+                                                <span className="text-slate-500">Framing:</span>
+                                                <p className="text-slate-300">{shot.framing}</p>
+                                            </div>
+                                            <div>
+                                                <span className="text-slate-500">DoF:</span>
+                                                <p className="text-slate-300">{shot.depth_of_field}</p>
+                                            </div>
+                                            <div>
+                                                <span className="text-slate-500">Focus:</span>
+                                                <p className="text-slate-300">{shot.focus_pulling}</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+
+                        {/* Technical Notes */}
+                        {shots.technical_notes && (
+                            <div className="p-4 bg-slate-700/30 rounded-lg mb-6">
+                                <h4 className="font-semibold mb-2">Technical Notes</h4>
+                                <p className="text-sm text-slate-400">{shots.technical_notes}</p>
+                            </div>
+                        )}
+
+                        {/* Equipment */}
+                        {shots.equipment_suggestions && (
+                            <div>
+                                <h4 className="font-semibold mb-2">Recommended Equipment</h4>
+                                <div className="flex flex-wrap gap-2">
+                                    {shots.equipment_suggestions.map((eq, idx) => (
+                                        <span key={idx} className="text-xs bg-orange-500/20 px-2 py-1 rounded">
+                                            {eq}
+                                        </span>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+                    </div>
+                </div>
+            );
+        }
+
+        // Helper Components
+        function StatCard({ label, value }) {
+            return (
+                <div className="border border-blue-500/20 rounded-lg p-4 text-center">
+                    <p className="text-slate-400 text-sm mb-1">{label}</p>
+                    <p className="text-2xl font-bold text-blue-300">{value}</p>
+                </div>
+            );
+        }
+
+        function EmotionalArcChart({ episodes }) {
+            const chartRef = useRef(null);
+            const chartInstance = useRef(null);
+
+            useEffect(() => {
+                if (!chartRef.current || !episodes.length) return;
+
+                const ctx = chartRef.current.getContext('2d');
+                
+                // Prepare data
+                const labels = [];
+                const emotionCounts = {};
+                
+                episodes.forEach((ep, eIdx) => {
+                    ep.emotional_arc_analysis?.forEach((arc) => {
+                        const emotion = arc.dominant_emotion || 'Unknown';
+                        emotionCounts[emotion] = (emotionCounts[emotion] || 0) + 1;
+                    });
+                });
+
+                const colors = ['#60a5fa', '#a855f7', '#ec4899', '#f97316', '#eab308', '#22c55e'];
+                const data = {
+                    labels: Object.keys(emotionCounts),
+                    datasets: [{
+                        data: Object.values(emotionCounts),
+                        backgroundColor: colors.slice(0, Object.keys(emotionCounts).length),
+                        borderColor: 'rgba(255,255,255,0.1)',
+                        borderWidth: 1
+                    }]
+                };
+
+                if (chartInstance.current) {
+                    chartInstance.current.destroy();
+                }
+
+                chartInstance.current = new Chart(ctx, {
+                    type: 'doughnut',
+                    data: data,
+                    options: {
+                        responsive: true,
+                        plugins: {
+                            legend: {
+                                labels: {
+                                    color: '#cbd5e1',
+                                    font: { family: "'Inter', sans-serif" }
+                                }
+                            }
+                        }
+                    }
+                });
+
+                return () => {
+                    if (chartInstance.current) {
+                        chartInstance.current.destroy();
+                    }
+                };
+            }, [episodes]);
+
+            return (
+                <div className="glass rounded-xl p-6">
+                    <h4 className="font-semibold mb-4">Emotional Arc Distribution</h4>
+                    <canvas ref={chartRef}></canvas>
+                </div>
+            );
+        }
+
+        function RiskPredictionChart({ episodes }) {
+            const chartRef = useRef(null);
+            const chartInstance = useRef(null);
+
+            useEffect(() => {
+                if (!chartRef.current || !episodes.length) return;
+
+                const ctx = chartRef.current.getContext('2d');
+                
+                // Count risk levels
+                const labels = episodes.map((ep, idx) => `Ep. ${ep.episode_number}`);
+                const highRisk = [];
+                const mediumRisk = [];
+                const lowRisk = [];
+
+                episodes.forEach((ep) => {
+                    let high = 0, medium = 0, low = 0;
+                    ep.retention_risk_prediction?.forEach((risk) => {
+                        const level = (risk.risk_level || '').toLowerCase();
+                        if (level.includes('high')) high++;
+                        else if (level.includes('medium')) medium++;
+                        else low++;
+                    });
+                    highRisk.push(high);
+                    mediumRisk.push(medium);
+                    lowRisk.push(low);
+                });
+
+                const data = {
+                    labels: labels,
+                    datasets: [
+                        {
+                            label: 'High Risk',
+                            data: highRisk,
+                            backgroundColor: '#ef4444'
+                        },
+                        {
+                            label: 'Medium Risk',
+                            data: mediumRisk,
+                            backgroundColor: '#f97316'
+                        },
+                        {
+                            label: 'Low Risk',
+                            data: lowRisk,
+                            backgroundColor: '#22c55e'
+                        }
+                    ]
+                };
+
+                if (chartInstance.current) {
+                    chartInstance.current.destroy();
+                }
+
+                chartInstance.current = new Chart(ctx, {
+                    type: 'bar',
+                    data: data,
+                    options: {
+                        responsive: true,
+                        stacked: true,
+                        plugins: {
+                            legend: {
+                                labels: {
+                                    color: '#cbd5e1',
+                                    font: { family: "'Inter', sans-serif" }
+                                }
+                            }
+                        },
+                        scales: {
+                            x: {
+                                stacked: true,
+                                ticks: { color: '#cbd5e1' },
+                                grid: { color: 'rgba(148, 163, 184, 0.1)' }
+                            },
+                            y: {
+                                stacked: true,
+                                ticks: { color: '#cbd5e1' },
+                                grid: { color: 'rgba(148, 163, 184, 0.1)' }
+                            }
+                        }
+                    }
+                });
+
+                return () => {
+                    if (chartInstance.current) {
+                        chartInstance.current.destroy();
+                    }
+                };
+            }, [episodes]);
+
+            return (
+                <div className="glass rounded-xl p-6">
+                    <h4 className="font-semibold mb-4">Risk Prediction by Episode</h4>
+                    <canvas ref={chartRef}></canvas>
+                </div>
+            );
+        }
+
+        // Render the App
+        ReactDOM.createRoot(document.getElementById('root')).render(
+            <React.StrictMode>
+                <App />
+            </React.StrictMode>
         );
     </script>
 </body>

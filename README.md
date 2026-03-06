@@ -1,50 +1,334 @@
-# VBOX Episodic Intelligence Engine
+# VBOX – Episodic Intelligence Engine
 
-AI-powered narrative intelligence for creators designing **multi-part vertical series**.
+> 🎬 AI-powered platform for creating and analyzing short-form vertical series with advanced narrative intelligence.
 
-This engine turns a single short story idea into a fully-analysed 5–8 episode 90‑second vertical series, providing:
+![VBOX](https://img.shields.io/badge/Status-Active-brightgreen) ![Python](https://img.shields.io/badge/Python-3.12+-blue) ![React](https://img.shields.io/badge/React-18-61dafb) ![FastAPI](https://img.shields.io/badge/FastAPI-0.115.6-009688)
 
-- **Story Decomposer Engine** – episode-wise arc from a single idea.
-- **Emotional Arc Analyser** – time-blocked emotional shifts and flat engagement zones.
-- **Cliffhanger Strength Scoring** – 1–10 scoring with rationale.
-- **Retention Risk Predictor** – predicted drop-off hotspots within 90 seconds.
-- **Optimisation Suggestion Engine** – structured, episode-level improvements.
+## 🚀 Overview
+
+VBOX is an AI-powered episodic intelligence engine that transforms your story ideas into fully analyzed, production-ready vertical series (90-second episodes). It leverages **Google Gemini AI** to provide comprehensive narrative analysis and creative guidance.
+
+## 🎬 Features
+
+### Core Analysis Engine
+- **Story Decomposer** – Episode-wise narrative arc from a single idea
+- **Emotional Arc Analyzer** – Time-blocked emotional shifts with flat engagement zone detection
+- **Cliffhanger Strength Scoring** – 1–10 scoring with detailed rationale
+- **Retention Risk Predictor** – Predicted drop-off hotspots within 90-second episodes
+- **Optimization Suggestions** – Structured, episode-level improvement recommendations
+
+### Enhanced Creative Tools (NEW!)
+- **Character Development Engine** – Detailed character arcs, backgrounds, visual descriptions
+- **Dialogue Suggestion System** – Natural, punchy dialogue optimized for short-form format
+- **Visual Mood Board Generator** – Color palettes, camera styles, lighting design, location suggestions
+- **Music & Sound Design Recommender** – Genre, tempo, reference artists, sound effects
+- **Shot Composition Guide** – Frame techniques, camera movements, equipment suggestions
+- **Multi-Format Genre Support** – Drama, Comedy, Thriller, Romance, Sci-Fi, Fantasy
+
+### Modern Interface
+- **Beautiful React Frontend** – Glassmorphism design with dark theme
+- **Interactive Visualizations** – Charts for emotional arcs and risk prediction
+- **Tab-Based Navigation** – Organized info across Overview, Episodes, Characters, Visuals, Music, Shots
+- **Responsive Design** – Works on desktop and tablet
+- **Real-time API Integration** – Seamless communication with backend
+
+### Text-to-Speech (Optional)
+- **Google Cloud TTS Integration** – Professional voice narration preview
+- **Multiple Voice Options** – Various languages and speaker profiles
+- **Base64 Audio Stream** – Direct audio playback in browser
 
 ---
 
-## High-level architecture
+## 🏗️ Architecture
 
-Vertical separation between **intelligence layer (Python + Gemini)** and **creator workspace UI (HTML/CSS/JS)**.
-
-```mermaid
-flowchart LR
-    C[Creator Browser UI\nHTML + CSS + JS] -->|story idea, params| API[/FastAPI Backend/]
-    API -->|calls| LLM[Google Gemini\nGenerativeModel]
-    LLM -->|JSON (strict schema)| Engine[Python Episodic Engine\n(post-processing, scoring)]
-    Engine -->|series + metrics| API
-    API -->|JSON| C
+```
+┌─────────────────────────────────────────────────────────────┐
+│                    Browser (React Frontend)                  │
+│           Modern UI with Chart.js Visualizations             │
+└────────────────────────────┬────────────────────────────────┘
+                             │
+                    HTTP/JSON API
+                             │
+┌────────────────────────────▼────────────────────────────────┐
+│                   FastAPI Server                              │
+│  /api/analyse  /api/characters  /api/dialogue  /api/tts      │
+│  /api/mood-board  /api/music  /api/shots  /api/health       │
+└────────────────────────────┬────────────────────────────────┘
+                             │
+        ┌─────────────────────┼──────────────────────┐
+        │                     │                      │
+        ▼                     ▼                      ▼
+    [Gemini AI]         [Episodic Engine]    [Google Cloud TTS]
+  (Text Generation)     (JSON Parsing &      (Voice Synthesis)
+                        Metrics)
 ```
 
 ---
 
-## Project structure
+## 📂 Project Structure
 
-- `backend/episodic_engine.py` – core Episodic Intelligence Engine (LLM call + JSON parsing + heuristic metrics).
-- `backend/api.py` – FastAPI server exposing `/api/analyse`.
-- `frontend/index.html` – main creator-facing UI.
-- `frontend/styles.css` – modern, glassmorphism-inspired styling.
-- `frontend/app.js` – JS client calling the backend and rendering analytics.
-- `app.py` – optional Streamlit prototype UI using the same idea (can be demoed separately).
-- `.env` – environment config (Gemini key placeholder).
-- `requirements.txt` – Python dependencies.
+```
+.
+├── backend/
+│   ├── api.py                  # FastAPI endpoints for all features
+│   ├── episodic_engine.py      # Core & extended creative engines
+│   └── __pycache__/
+├── frontend/
+│   ├── index.html              # Main React application (NEW!)
+│   ├── index_old.html          # Legacy version (archived)
+│   ├── styles.css              # Custom styles
+│   └── [other components]
+├── app.py                      # Optional Streamlit prototype
+├── list_gemini_models.py       # Utility script
+├── requirements.txt            # Python dependencies
+├── .env                        # Configuration (API keys)
+└── README.md                   # This file
+```
 
 ---
 
-## Quick start (end‑to‑end)
+## 🚀 Quick Start
 
-### 1. Set your Gemini API key
+### 1. Install Dependencies
 
-Edit `.env` at the project root:
+```bash
+pip install -r requirements.txt
+```
+
+### 2. Set Up Google Gemini API
+
+Create a `.env` file in the project root:
+
+```bash
+GEMINI_API_KEY="your_actual_gemini_api_key_here"
+```
+
+Get your key from [Google AI Studio](https://aistudio.google.com/app/apikey)
+
+### 3. (Optional) Configure Text-to-Speech
+
+For Google Cloud Text-to-Speech:
+
+```bash
+# Install gcloud CLI and authenticate
+gcloud auth application-default login
+
+# (The backend will use your authenticated credentials)
+```
+
+### 4. Start the Backend Server
+
+```bash
+cd backend
+uvicorn api:app --reload --host 0.0.0.0 --port 8000
+```
+
+The API will be available at `http://localhost:8000`
+
+### 5. Open the Frontend
+
+Open your browser to your frontend hosting (e.g., simple HTTP server):
+
+```bash
+cd frontend
+python -m http.server 8001
+# Visit http://localhost:8001
+```
+
+Or open `frontend/index.html` directly in your browser (API calls will work cross-origin).
+
+---
+
+## 📝 API Endpoints
+
+### Main Analysis
+**POST** `/api/analyse`
+- Generates complete series analysis with all features
+- Request body:
+  ```json
+  {
+    "core_idea": "A detective hunting a mysterious figure in the city",
+    "episode_count": 6,
+    "genre": "thriller",
+    "tone": "suspenseful",
+    "target_audience": "18-35",
+    "model_name": "gemini-2.5-flash"
+  }
+  ```
+
+### Extended Features
+- **POST** `/api/characters` – Character development only
+- **POST** `/api/dialogue` – Dialogue suggestions
+- **POST** `/api/mood-board` – Visual mood board
+- **POST** `/api/music` – Music recommendations
+- **POST** `/api/shots` – Shot composition
+
+### Text-to-Speech
+**POST** `/api/tts`
+```json
+{
+  "text": "Your dialogue or narration text",
+  "voice_name": "en-US-Neural2-C",
+  "language_code": "en-US"
+}
+```
+
+### Health Check
+**GET** `/api/health` – Returns `{"status": "healthy", "version": "2.0.0"}`
+
+---
+
+## 🎨 Features Showcase
+
+### Emotional Arc Analysis
+- Visual breakdown of emotions across time blocks
+- Engagement level tracking (High/Medium/Low)
+- Automatic flat zone detection with warnings
+- Interactive doughnut charts showing emotion distribution
+
+### Character Development
+- Full character profiles with archetypes
+- Character evolution across episodes
+- Visual appearance suggestions
+- Ensemble dynamics analysis
+- Expandable character cards with trait badges
+
+### Visual Mood Board
+- Hex color palettes with reasoning
+- Camera and lighting recommendations
+- Location suggestions
+- VFX and transition ideas
+- Typography and text overlay guidance
+
+### Music & Sound Design
+- Opening theme specifications (genre, tempo, mood)
+- Background music by emotional state
+- Reference artists and genres
+- Sound effects library
+- Silence/breathing room placement
+
+### Shot Composition
+- Time-blocked shot breakdowns
+- Camera movement specifications
+- Depth of field recommendations
+- Focus pulling techniques
+- Equipment suggestions
+
+---
+
+## 💻 Technology Stack
+
+**Backend:**
+- FastAPI (async web framework)
+- Google Generative AI SDK (Gemini)
+- Google Cloud Text-to-Speech
+- Pydantic (validation)
+- Uvicorn (ASGI server)
+
+**Frontend:**
+- React 18
+- Tailwind CSS (utility-first CSS)
+- Chart.js (interactive visualizations)
+- Lucide Icons
+- Framer Motion (animations)
+
+**Deployment-Ready:**
+- CORS enabled for cross-origin requests
+- Environment-based configuration
+- Async/await patterns for performance
+
+---
+
+## 🎯 Use Cases
+
+1. **Content Creators** – Plan vertical series for social media
+2. **Screenwriters** – Develop episodic story structures
+3. **Producers** – Guide production with AI-generated insights
+4. **Educators** – Teach storytelling with data-driven feedback
+5. **Narrative Designers** – Design interactive story branching
+
+---
+
+## 🔧 Advanced Configuration
+
+### Model Selection
+Change the Gemini model by updating `model_name` in the request:
+```json
+{
+  "model_name": "gemini-1.5-pro"
+}
+```
+
+Available models:
+- `gemini-2.5-flash` (default, fast)
+- `gemini-1.5-pro` (more detailed)
+- `gemini-1.5-flash` (faster)
+
+### Custom Voices (TTS)
+Google Cloud TTS supports many voices:
+- `en-US-Neural2-A` through `en-US-Neural2-I` (various genders/ages)
+- Multilingual support with language codes (e.g., `fr-FR`, `es-ES`, `ja-JP`)
+
+### Environment Variables
+```bash
+GEMINI_API_KEY=your_key_here
+# Optional: Google Cloud credentials for TTS
+GOOGLE_APPLICATION_CREDENTIALS=/path/to/credentials.json
+```
+
+---
+
+## 📊 Performance Tips
+
+- **Episode Count:** Start with 6 episodes; more episodes = longer processing
+- **Model Selection:** `gemini-2.5-flash` is fastest for hackathons
+- **Batch Requests:** The backend can handle concurrent requests
+- **Caching:** Consider caching results for the same story idea
+
+---
+
+## ⚠️ Limitations & Future Work
+
+- **Episode Limit:** Currently 5–8 episodes per series
+- **Video Previews:** Shot composition doesn't generate actual footage (future integration with Runway/Synthesia)
+- **TTS Voices:** Requires Google Cloud authentication for now
+- **Real-time Streaming:** API responses are full objects (could be streamed for large responses)
+
+---
+
+## 🤝 Contributing
+
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit changes (`git commit -m 'Add amazing feature'`)
+4. Push to branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
+
+---
+
+## 📄 License
+
+This project is provided as-is for educational and commercial use.
+
+---
+
+## 🎓 Credits
+
+- **Google Gemini API** – AI narrative intelligence
+- **Google Cloud TTS** – Voice synthesis
+- **FastAPI** – Backend framework
+- **React + Tailwind** – Frontend architecture
+
+---
+
+## 🚀 Getting Help
+
+- Check the API documentation at `/docs` (Swagger UI)
+- Review sample outputs in the results tabs
+- Test with the provided example prompts
+
+**Happy storytelling! 🎬**
+
 
 ```bash
 GEMINI_API_KEY="YOUR_REAL_GEMINI_KEY_HERE"
