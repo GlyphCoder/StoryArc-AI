@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>VBOX Episodic Intelligence Engine</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        indigo: '#0B0F19',
+                        arena: '#0F1522',
+                        crimson: '#F43F5E',
+                        slateLight: '#F1F5F9',
+                        volt: '#CCF381',
+                        slateDim: '#94A3B8',
+                        slateBorder: '#1E293B'
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        mono: ['Fira Code', 'monospace']
+                    }
+                }
+            }
+        }
+    </script>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@300;400;600&family=Inter:wght@300;400;700&display=swap" rel="stylesheet">
+
+    <style>
+        body, html { margin: 0; padding: 0; width: 100%; height: 100%; background-color: #0B0F19; color: #F1F5F9; font-family: 'Inter', sans-serif; }
+        #root { width: 100%; height: 100%; }
+        .glass-panel {
+            background: rgba(15, 21, 34, 0.6);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(30, 41, 59, 0.8);
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.5);
+        }
+    </style>
+
+    <!-- Import Maps for React -->
+    <script type="importmap">
+    {
+        "imports": {
+            "react": "https://esm.sh/react@18.2.0",
+            "react/jsx-runtime": "https://esm.sh/react@18.2.0/jsx-runtime",
+            "react-dom/client": "https://esm.sh/react-dom@18.2.0/client",
+            "lucide-react": "https://esm.sh/lucide-react@0.330.0?external=react",
+            "framer-motion": "https://esm.sh/framer-motion@11.2.10?external=react"
+        }
+    }
+    </script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel" data-type="module">
+        import React, { useState, useEffect, createContext, useContext, useCallback } from 'react';
+        import { createRoot } from 'react-dom/client';
+        import { Sun, Moon, Film, BarChart2, Zap, AlertTriangle, BookOpen, Download, Trash2, History, X } from 'lucide-react';
+        import { motion, AnimatePresence } from 'framer-motion';
+
+        const ToastContext = createContext();
+
+        const ToastProvider = ({ children }) => {
+            const [toasts, setToasts] = useState([]);
+            const id = () => Math.random().toString(36).substr(2, 9);
+
+            const addToast = useCallback((content, type = 'info') => {
+                setToasts(toasts => [...toasts, { id: id(), content, type }]);
+            }, [setToasts]);
+
+            const removeToast = useCallback((id) => {
+                setToasts(toasts => toasts.filter(t => t.id !== id));
+            }, [setToasts]);
+
+            return (
+                <ToastContext.Provider value={{ addToast, removeToast }}>
+                    {children}
+                    <div className="fixed top-4 right-4 z-50">
+                        <AnimatePresence>
+                            {toasts.map(toast => (
+                                <Toast key={toast.id} {...toast} removeToast={removeToast} />
+                            ))}
+                        </AnimatePresence>
+                    </div>
+                </ToastContext.Provider>
+            );
+        };
+
+        const Toast = ({ id, content, type, removeToast }) => {
+            useEffect(() => {
+                const timer = setTimeout(() => removeToast(id), 5000);
+                return () => clearTimeout(timer);
+            }, [id, removeToast]);
+
+            const colors = {
+                info: 'bg-blue-500',
+                success: 'bg-green-500',
+                error: 'bg-crimson',
+            };
+
+            return (
+                <motion.div
+                    layout
+                    initial={{ opacity: 0, y: -50, scale: 0.3 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.5, transition: { duration: 0.2 } }}
+                    className={`relative p-4 mb-4 text-white rounded-lg shadow-lg ${colors[type]}`}
+                >
+                    <button onClick={() => removeToast(id)} className="absolute top-2 right-2 text-white/70 hover:text-white"><X size={18}/></button>
+                    {content}
+                </motion.div>
+            );
+        };
+
+        const useToast = () => useContext(ToastContext);
+
+        const ThemeContext = createContext();
+
+        const ThemeProvider = ({ children }) => {
+            const [theme, setTheme] = useState(localStorage.getItem('theme') || 'dark');
+
+            useEffect(() => {
+                const root = window.document.documentElement;
+                root.classList.remove('light', 'dark');
+                root.classList.add(theme);
+                localStorage.setItem('theme', theme);
+            }, [theme]);
+
+            return (
+                <ThemeContext.Provider value={{ theme, setTheme }}>
+                    {children}
+                </ThemeContext.Provider>
+            );
+        };
+
+        const ThemeSwitcher = () => {
+            const { theme, setTheme } = useContext(ThemeContext);
+
+            return (
+                <motion.button
+                    onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+                    className="glass-panel p-2 rounded-full text-volt hover:text-white"
+                    whileHover={{ scale: 1.1 }}
+                    whileTap={{ scale: 0.9 }}
+                >
+                    <AnimatePresence mode="wait">
+                        <motion.div
+                            key={theme}
+                            initial={{ opacity: 0, rotate: -90 }}
+                            animate={{ opacity: 1, rotate: 0 }}
+                            exit={{ opacity: 0, rotate: 90 }}
+                            transition={{ duration: 0.2 }}
+                        >
+                            {theme === 'dark' ? <Sun size={20} /> : <Moon size={20} />}
+                        </motion.div>
+                    </AnimatePresence>
+                </motion.button>
+            );
+        };
+
+        const StoryInput = ({ core_idea, set_core_idea, episode_count, set_episode_count, on_generate, loading }) => {
+            return (
+                <motion.div 
+                    className="mb-8 glass-panel p-6 rounded-lg"
+                    initial={{ opacity: 0, y: 50 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.5 }}
+                >
+                    <h2 className="text-2xl font-bold mb-4 text-volt flex items-center"><BookOpen className="mr-2"/>1. Input Your Core Story Idea</h2>
+                    <textarea
+                        className="w-full bg-arena border-b-2 border-slateBorder p-3 text-slateLight font-mono text-sm focus:outline-none focus:border-volt transition-colors placeholder:text-slateBorder rounded-md"
+                        rows="5"
+                        placeholder="Example: A rookie urban magician tries to expose a viral fake psychic cult, only to discover their illusions are powered by real, dangerous tech..."
+                        value={core_idea}
+                        onChange={(e) => set_core_idea(e.target.value)}
+                        disabled={loading}
+                    ></textarea>
+                    <div className="mt-4">
+                        <label htmlFor="episode_count" className="block text-sm font-medium text-slateDim mb-2">
+                            Number of Episodes: {episode_count}
+                        </label>
+                        <input
+                            type="range"
+                            id="episode_count"
+                            min="5"
+                            max="8"
+                            value={episode_count}
+                            onChange={(e) => set_episode_count(e.target.value)}
+                            className="w-full h-2 bg-slateBorder rounded-lg appearance-none cursor-pointer"
+                            disabled={loading}
+                        />
+                    </div>
+                    <div className="mt-6 text-center">
+                        <motion.button
+                            onClick={on_generate}
+                            className="px-8 py-3 border-2 border-volt text-volt hover:bg-volt hover:text-indigo transition-all font-bold tracking-widest rounded-full flex items-center justify-center mx-auto"
+                            whileHover={{ scale: 1.05 }}
+                            whileTap={{ scale: 0.95 }}
+                            disabled={loading}
+                        >
+                            <Zap className="mr-2" size={18}/>
+                            {loading ? 'Generating...' : 'Generate Episodic Intelligence'}
+                        </motion.button>
+                    </div>
+                </motion.div>
+            );
+        };
+
+        const ResultsDisplay = ({ results, onClear, onExport }) => {
+            if (!results) return null;
+
+            const { series, engine_metrics } = results;
+
+            return (
+                <motion.div 
+                    className="glass-panel p-6 rounded-lg"
+                    initial={{ opacity: 0, y: 50 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.5 }}
+                >
+                    <div className="flex justify-between items-center mb-4">
+                        <h2 className="text-2xl font-bold text-volt flex items-center"><BarChart2 className="mr-2"/>2. Analysis Results</h2>
+                        <div>
+                            <motion.button onClick={onExport} className="p-2 text-slateDim hover:text-volt" title="Export JSON" whileHover={{scale: 1.1}}><Download size={18}/></motion.button>
+                            <motion.button onClick={onClear} className="p-2 text-slateDim hover:text-crimson" title="Clear Results" whileHover={{scale: 1.1}}><Trash2 size={18}/></motion.button>
+                        </div>
+                    </div>
+                    <SeriesOverview series={series} metrics={engine_metrics} />
+                    <div className="mt-8">
+                        <h3 className="text-xl font-bold mb-4">Episode-by-Episode Intelligence</h3>
+                        <AnimatePresence>
+                        {series.episodes.map((episode, i) => (
+                            <EpisodeDetails key={episode.episode_number} episode={episode} index={i} />
+                        ))}
+                        </AnimatePresence>
+                    </div>
+                </motion.div>
+            );
+        };
+
+        const SeriesOverview = ({ series, metrics }) => {
+            return (
+                <motion.div initial={{opacity:0}} animate={{opacity:1}}>
+                    <h3 className="text-2xl font-bold text-volt flex items-center"><Film className="mr-2"/>{series.series_title}</h3>
+                    <p className="text-slateDim italic mt-1">{series.series_logline}</p>
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-4 text-center">
+                        <motion.div whileHover={{scale:1.05}} className="glass-panel p-4 rounded-lg">
+                            <p className="text-3xl font-bold">{series.total_episodes}</p>
+                            <p className="text-sm text-slateDim">Total Episodes</p>
+                        </motion.div>
+                        <motion.div whileHover={{scale:1.05}} className="glass-panel p-4 rounded-lg">
+                            <p className="text-3xl font-bold">{metrics.avg_cliffhanger_strength}</p>
+                            <p className="text-sm text-slateDim">Avg. Cliffhanger</p>
+                        </motion.div>
+                        <motion.div whileHover={{scale:1.05}} className="glass-panel p-4 rounded-lg">
+                            <p className="text-3xl font-bold">{metrics.high_risk_segments}</p>
+                            <p className="text-sm text-slateDim">High-Risk Segments</p>
+                        </motion.div>
+                        <motion.div whileHover={{scale:1.05}} className="glass-panel p-4 rounded-lg">
+                            <p className="text-3xl font-bold">{metrics.flat_zone_warnings}</p>
+                            <p className="text-sm text-slateDim">Flat-Zone Warnings</p>
+                        </motion.div>
+                    </div>
+                </motion.div>
+            );
+        };
+
+        const EpisodeDetails = ({ episode, index }) => {
+            const [is_open, set_is_open] = useState(false);
+            return (
+                <motion.div 
+                    className="mb-4 glass-panel rounded-lg overflow-hidden"
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: index * 0.1 }}
+                >
+                    <button
+                        onClick={() => set_is_open(!is_open)}
+                        className="w-full text-left p-4 bg-arena hover:bg-slateBorder transition-colors flex justify-between items-center"
+                    >
+                        <h4 className="font-bold">Episode {episode.episode_number}: {episode.episode_title}</h4>
+                        <motion.div animate={{ rotate: is_open ? 90 : 0}}><Zap size={16} className="text-volt"/></motion.div>
+                    </button>
+                    <AnimatePresence>
+                    {is_open && (
+                        <motion.div 
+                            className="p-4"
+                            initial={{ height: 0, opacity: 0 }}
+                            animate={{ height: 'auto', opacity: 1 }}
+                            exit={{ height: 0, opacity: 0 }}
+                            transition={{ duration: 0.3 }}
+                        >
+                            <p className="mb-4"><span className="font-bold text-slateDim">Narrative:</span> {episode.narrative_breakdown}</p>
+                            
+                            <h5 className="font-bold text-slateDim mt-4 mb-2">Emotional Arc Analysis</h5>
+                            <div className="overflow-x-auto">
+                                <table className="w-full text-sm text-left">
+                                    <thead className="bg-arena">
+                                        <tr>
+                                            <th className="p-2">Time Block</th>
+                                            <th className="p-2">Emotion</th>
+                                            <th className="p-2">Engagement</th>
+                                            <th className="p-2">Warning</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {episode.emotional_arc_analysis.map((arc, i) => (
+                                            <tr key={i} className="border-b border-slateBorder">
+                                                <td className="p-2">{arc.time_block}</td>
+                                                <td className="p-2">{arc.dominant_emotion}</td>
+                                                <td className="p-2">{arc.engagement_level}</td>
+                                                <td className="p-2">{arc.flat_zone_warning ? <span className="text-crimson flex items-center"><AlertTriangle size={14} className="mr-1"/> Yes</span> : 'No'}</td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            <h5 className="font-bold text-slateDim mt-4 mb-2">Optimisation Suggestions</h5>
+                            <ul className="list-disc list-inside">
+                                {episode.optimisation_suggestions.map((suggestion, i) => (
+                                    <li key={i}>{suggestion}</li>
+                                ))}
+                            </ul>
+                        </motion.div>
+                    )}
+                    </AnimatePresence>
+                </motion.div>
+            );
+        };
+        
+        const HistoryPanel = ({ history, onLoad, onClearHistory }) => {
+            return (
+                <motion.div 
+                    className="fixed top-0 right-0 h-full w-80 bg-indigo glass-panel z-50 p-4"
+                    initial={{ x: '100%' }}
+                    animate={{ x: 0 }}
+                    exit={{ x: '100%' }}
+                    transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+                >
+                    <div className="flex justify-between items-center mb-4">
+                        <h3 className="text-xl font-bold text-volt flex items-center"><History className="mr-2"/> History</h3>
+                        <motion.button onClick={onClearHistory} className="p-2 text-slateDim hover:text-crimson" title="Clear History" whileHover={{scale: 1.1}}><Trash2 size={18}/></motion.button>
+                    </div>
+                    <div className="h-full overflow-y-auto">
+                        {history.length === 0 ? (
+                            <p className="text-slateDim text-center mt-8">No history yet.</p>
+                        ) : (
+                            history.map(item => (
+                                <motion.div 
+                                    key={item.id} 
+                                    className="p-3 mb-2 rounded-md bg-arena hover:bg-slateBorder cursor-pointer"
+                                    onClick={() => onLoad(item.results)}
+                                    whileHover={{scale:1.02}}
+                                >
+                                    <p className="font-bold truncate">{item.results.series.series_title}</p>
+                                    <p className="text-xs text-slateDim">{new Date(item.timestamp).toLocaleString()}</p>
+                                </motion.div>
+                            ))
+                        )}
+                    </div>
+                </motion.div>
+            )
+        }
+
+        const App = () => {
+            const toast = useToast();
+            const [core_idea, set_core_idea] = useState('');
+            const [episode_count, set_episode_count] = useState(6);
+            const [results, set_results] = useState(null);
+            const [loading, set_loading] = useState(false);
+            const [history, set_history] = useState([]);
+            const [show_history, set_show_history] = useState(false);
+            
+            const uuid = () => crypto.randomUUID();
+
+            useEffect(() => {
+                const stored_history = localStorage.getItem('episodic_history');
+                if (stored_history) {
+                    set_history(JSON.parse(stored_history));
+                }
+            }, []);
+
+            useEffect(() => {
+                localStorage.setItem('episodic_history', JSON.stringify(history));
+            }, [history]);
+
+            const handle_generate = async () => {
+                set_loading(true);
+                set_results(null);
+                
+                const API_URL = 'http://127.0.0.1:8000/api/analyse';
+
+                try {
+                    const response = await fetch(API_URL, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            core_idea: core_idea,
+                            episode_count: parseInt(episode_count, 10),
+                        }),
+                    });
+
+                    if (!response.ok) {
+                        const err_data = await response.json();
+                        throw new Error(err_data.detail || 'An unknown error occurred.');
+                    }
+
+                    const data = await response.json();
+                    set_results(data);
+                    set_history(prev => [{ id: uuid(), results: data, timestamp: new Date() }, ...prev]);
+                    toast.addToast('Analysis successful!', 'success');
+                } catch (err) {
+                    toast.addToast(err.message, 'error');
+                } finally {
+                    set_loading(false);
+                }
+            };
+
+            const handle_clear = () => {
+                set_results(null);
+                toast.addToast('Results cleared', 'info');
+            }
+            
+            const handle_export = () => {
+                if (!results) return;
+                const blob = new Blob([JSON.stringify(results, null, 2)], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'episodic_intelligence_results.json';
+                a.click();
+                URL.revokeObjectURL(url);
+                toast.addToast('Results exported', 'info');
+            };
+            
+            const load_from_history = (data) => {
+                set_results(data);
+                set_show_history(false);
+                toast.addToast('Loaded from history', 'info');
+            }
+            
+            const clear_history = () => {
+                set_history([]);
+                toast.addToast('History cleared', 'info');
+            }
+
+            return (
+                <motion.div 
+                    className="min-h-screen bg-white dark:bg-indigo text-slate-800 dark:text-slateLight p-4 sm:p-6 md:p-8"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ duration: 0.8 }}
+                >
+                    <div className="max-w-7xl mx-auto">
+                        <header className="text-center mb-8 relative">
+                            <h1 className="text-4xl sm:text-5xl font-bold text-volt font-mono">VBOX Episodic Intelligence Engine</h1>
+                            <p className="text-slate-600 dark:text-slateDim mt-2">AI-powered narrative intelligence for vertical episodic storytelling.</p>
+                            <div className="absolute top-4 right-14">
+                                <motion.button onClick={() => set_show_history(true)} className="glass-panel p-2 rounded-full text-volt hover:text-white" whileHover={{scale:1.1}}><History size={20}/></motion.button>
+                            </div>
+                            <ThemeSwitcher />
+                        </header>
+
+                        <main className="grid md:grid-cols-2 gap-8">
+                            <div>
+                                <StoryInput
+                                    core_idea={core_idea}
+                                    set_core_idea={set_core_idea}
+                                    episode_count={episode_count}
+                                    set_episode_count={set_episode_count}
+                                    on_generate={handle_generate}
+                                    loading={loading}
+                                />
+                            </div>
+                            <div>
+                                <AnimatePresence mode="wait">
+                                    {loading && (
+                                        <motion.div
+                                            key="loader"
+                                            className="glass-panel p-6 rounded-lg text-center h-full flex items-center justify-center"
+                                            initial={{ opacity: 0, y: 20 }}
+                                            animate={{ opacity: 1, y: 0 }}
+                                            exit={{ opacity: 0, y: -20 }}
+                                        >
+                                            <h2 className="text-2xl font-bold mb-4 text-volt animate-pulse">Generating Intelligence...</h2>
+                                        </motion.div>
+                                    )}
+
+                                    {results && !loading && (
+                                        <motion.div key="results" initial={{opacity:0}} animate={{opacity:1}}>
+                                            <ResultsDisplay results={results} onClear={handle_clear} onExport={handle_export} />
+                                        </motion.div>
+                                    )}
+
+                                    {!results && !loading && (
+                                        <motion.div 
+                                            key="placeholder"
+                                            className="glass-panel p-6 rounded-lg text-center h-full flex items-center justify-center"
+                                            initial={{ opacity: 0 }}
+                                            animate={{ opacity: 1 }}
+                                        >
+                                            <h2 className="text-2xl font-bold mb-4 text-slateDim">Your results will appear here</h2>
+                                        </motion.div>
+                                    )}
+                                </AnimatePresence>
+                            </div>
+                        </main>
+                        
+                        <AnimatePresence>
+                            {show_history && <HistoryPanel history={history} onLoad={load_from_history} onClearHistory={clear_history} onClose={() => set_show_history(false)} />}
+                        </AnimatePresence>
+                    </div>
+                </motion.div>
+            );
+        };
+
+        const root = createRoot(document.getElementById('root'));
+        root.render(
+            <ThemeProvider>
+                <ToastProvider>
+                    <App />
+                </ToastProvider>
+            </ThemeProvider>
+        );
+    </script>
+</body>
+</html>
