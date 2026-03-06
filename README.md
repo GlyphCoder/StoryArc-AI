@@ -1,12 +1,12 @@
-# VBOX – Episodic Intelligence Engine
+# StoryArc AI – Episodic Intelligence Engine
 
 > 🎬 AI-powered platform for creating and analyzing short-form vertical series with advanced narrative intelligence.
 
-![VBOX](https://img.shields.io/badge/Status-Active-brightgreen) ![Python](https://img.shields.io/badge/Python-3.12+-blue) ![React](https://img.shields.io/badge/React-18-61dafb) ![FastAPI](https://img.shields.io/badge/FastAPI-0.115.6-009688)
+![StoryArc AI](https://img.shields.io/badge/Status-Active-brightgreen) ![Python](https://img.shields.io/badge/Python-3.12+-blue) ![React](https://img.shields.io/badge/React-18-61dafb) ![FastAPI](https://img.shields.io/badge/FastAPI-0.115.6-009688)
 
 ## 🚀 Overview
 
-VBOX is an AI-powered episodic intelligence engine that transforms your story ideas into fully analyzed, production-ready vertical series (90-second episodes). It leverages **Google Gemini AI** to provide comprehensive narrative analysis and creative guidance.
+StoryArc AI is an AI-powered episodic intelligence engine that transforms your story ideas into fully analyzed, production-ready vertical series (90-second episodes). It leverages **Google Gemini AI** to provide comprehensive narrative analysis and creative guidance.
 
 ## 🎬 Features
 
